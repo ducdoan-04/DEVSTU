@@ -2,6 +2,8 @@ use std::fs::File;
 use std::path::{Path, PathBuf};
 use tiny_http::{Header, Method, Request, Response, Server, StatusCode};
 use url::Url;
+use base64::engine::general_purpose::STANDARD as BASE64;
+use base64::Engine;
 
 fn add_cors_headers<R: std::io::Read>(mut resp: Response<R>) -> Response<R> {
     let headers = [
@@ -78,7 +80,248 @@ pub fn find_base_dir() -> PathBuf {
     PathBuf::from(".")
 }
 
-fn handle_request(req: Request, base_dir: &Path) {
+
+fn decode_data_url_bytes(data: &str) -> Result<Vec<u8>, String> {
+    let b64 = if let Some(idx) = data.find(',') {
+        &data[idx + 1..]
+    } else {
+        data
+    };
+    BASE64.decode(b64.trim().as_bytes())
+        .map_err(|e| format!("Base64 decode error: {e}"))
+}
+
+fn liying_change_background(
+    img_b64: &str,
+    color: &str,
+    transparent: bool,
+    straighten: bool,
+    level_only: bool,
+    base_dir: &Path,
+) -> Result<String, String> {
+    let start = std::time::Instant::now();
+    let img_bytes = decode_data_url_bytes(img_b64)?;
+
+    let script_paths = [
+        base_dir.join("scripts").join("liying_process.py"),
+        PathBuf::from("scripts/liying_process.py"),
+        PathBuf::from("F:/Workspace/Code projects/2. Tool Media by Doan/Collabs-Retouch-Pro/scripts/liying_process.py"),
+    ];
+    let script = script_paths.iter().find(|p| p.exists())
+        .ok_or_else(|| "Could not locate liying_process.py".to_string())?;
+
+    let py_interpreters = [
+        "F:/Workspace/Code projects/LiYing-master/python-embed/python.exe",
+        "F:/Workspace/Code projects/LiYing/python-embed/python.exe",
+        "python-embed/python.exe",
+        "python",
+        "python3",
+    ];
+    let py = py_interpreters.iter().find(|p| {
+        if p.contains('/') || p.contains('\\') {
+            Path::new(p).exists()
+        } else {
+            true
+        }
+    }).ok_or_else(|| "Could not find python interpreter with LiYing environment".to_string())?;
+
+    let temp_dir = std::env::temp_dir();
+    let pid = std::process::id();
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis();
+    let temp_input = temp_dir.join(format!("devstu_liying_in_{pid}_{now}.png"));
+    let temp_output = temp_dir.join(format!("devstu_liying_out_{pid}_{now}.png"));
+    let temp_matte = temp_dir.join(format!("devstu_liying_matte_{pid}_{now}.png"));
+
+    std::fs::write(&temp_input, &img_bytes)
+        .map_err(|e| format!("Failed to save temp input: {e}"))?;
+
+    let mut cmd = std::process::Command::new(py);
+    cmd.arg(script)
+        .arg("--input").arg(&temp_input)
+        .arg("--output").arg(&temp_output)
+        .arg("--matte-output").arg(&temp_matte)
+        .arg("--color").arg(color);
+
+    if transparent {
+        cmd.arg("--transparent");
+    }
+    if straighten {
+        cmd.arg("--straighten");
+    }
+    if level_only {
+        cmd.arg("--level-only");
+    }
+
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+
+    let output = cmd.output().map_err(|e| format!("Failed to spawn LiYing process: {e}"))?;
+    let _ = std::fs::remove_file(&temp_input);
+
+    if !output.status.success() {
+        let err_str = String::from_utf8_lossy(&output.stderr);
+        let _ = std::fs::remove_file(&temp_output);
+        let _ = std::fs::remove_file(&temp_matte);
+        return Err(format!("LiYing background replacement failed: {err_str}"));
+    }
+
+    if !temp_output.exists() {
+        let _ = std::fs::remove_file(&temp_matte);
+        return Err("LiYing output image was not produced".to_string());
+    }
+
+    let out_bytes = std::fs::read(&temp_output).map_err(|e| e.to_string())?;
+    let _ = std::fs::remove_file(&temp_output);
+
+    let matte_data_url = if temp_matte.exists() {
+        let m_bytes = std::fs::read(&temp_matte).ok();
+        let _ = std::fs::remove_file(&temp_matte);
+        m_bytes.map(|b| format!("data:image/png;base64,{}", BASE64.encode(b)))
+    } else {
+        None
+    };
+
+    let data_url = format!("data:image/png;base64,{}", BASE64.encode(&out_bytes));
+    let stdout_str = String::from_utf8_lossy(&output.stdout);
+    let straightened = stdout_str.contains("\"straightened\": true");
+
+    let res = serde_json::json!({
+        "ok": true,
+        "data_url": data_url,
+        "matte_data_url": matte_data_url,
+        "straightened": straightened,
+        "elapsed_ms": start.elapsed().as_millis()
+    });
+
+    Ok(res.to_string())
+}
+
+fn evoto_hair_dye_process(body_str: &str, base_dir: &Path) -> Result<String, String> {
+    let start = std::time::Instant::now();
+    let v: serde_json::Value = serde_json::from_str(body_str).map_err(|e| e.to_string())?;
+    let img_b64 = v.get("image_base64").and_then(|x| x.as_str()).unwrap_or("");
+    let img_bytes = decode_data_url_bytes(img_b64)?;
+
+    let script = base_dir.join("scripts").join("evoto_hair_process.py");
+    let py = "F:/Workspace/Code projects/LiYing-master/python-embed/python.exe";
+
+    let temp_dir = std::env::temp_dir();
+    let pid = std::process::id();
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis();
+    let temp_in = temp_dir.join(format!("devstu_hair_in_{pid}_{now}.png"));
+    let temp_out = temp_dir.join(format!("devstu_hair_out_{pid}_{now}.png"));
+    let temp_mask = temp_dir.join(format!("devstu_hair_mask_{pid}_{now}.png"));
+
+    std::fs::write(&temp_in, &img_bytes).map_err(|e| format!("Failed to save input: {e}"))?;
+
+    let mut params_obj = v.clone();
+    if let Some(mask_b64) = v.get("mask_base64").and_then(|x| x.as_str()) {
+        if let Ok(m_bytes) = decode_data_url_bytes(mask_b64) {
+            let _ = std::fs::write(&temp_mask, &m_bytes);
+            if let Some(map) = params_obj.as_object_mut() {
+                map.insert("mask_path".to_string(), serde_json::Value::String(temp_mask.to_string_lossy().to_string()));
+            }
+        }
+    }
+
+    let mut cmd = std::process::Command::new(py);
+    cmd.arg(&script)
+        .arg(&temp_in)
+        .arg(&temp_out)
+        .arg(params_obj.to_string());
+
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+
+    let output = cmd.output().map_err(|e| format!("Failed to spawn hair process: {e}"))?;
+    let _ = std::fs::remove_file(&temp_in);
+    let _ = std::fs::remove_file(&temp_mask);
+
+    if !output.status.success() {
+        let err = String::from_utf8_lossy(&output.stderr);
+        let _ = std::fs::remove_file(&temp_out);
+        return Err(format!("Hair dye processing failed: {err}"));
+    }
+
+    if !temp_out.exists() {
+        return Err("Hair dye output was not produced".to_string());
+    }
+
+    let out_bytes = std::fs::read(&temp_out).map_err(|e| e.to_string())?;
+    let _ = std::fs::remove_file(&temp_out);
+    let data_url = format!("data:image/png;base64,{}", BASE64.encode(&out_bytes));
+
+    let res = serde_json::json!({
+        "ok": true,
+        "data_url": data_url,
+        "elapsed_ms": start.elapsed().as_millis()
+    });
+    Ok(res.to_string())
+}
+
+fn extract_highres_matte(body_str: &str, base_dir: &Path) -> Result<String, String> {
+    let start = std::time::Instant::now();
+    let v: serde_json::Value = serde_json::from_str(body_str).map_err(|e| e.to_string())?;
+    let img_b64 = v.get("image_base64").and_then(|x| x.as_str()).unwrap_or("");
+    let img_bytes = decode_data_url_bytes(img_b64)?;
+
+    let script = base_dir.join("scripts").join("extract_matte.py");
+    let py = "F:/Workspace/Code projects/LiYing-master/python-embed/python.exe";
+
+    let temp_dir = std::env::temp_dir();
+    let pid = std::process::id();
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis();
+    let temp_in = temp_dir.join(format!("devstu_matte_in_{pid}_{now}.png"));
+    let temp_out = temp_dir.join(format!("devstu_matte_out_{pid}_{now}.png"));
+
+    std::fs::write(&temp_in, &img_bytes).map_err(|e| format!("Failed to save input: {e}"))?;
+
+    let mut cmd = std::process::Command::new(py);
+    cmd.arg(&script)
+        .arg(&temp_in)
+        .arg(&temp_out);
+
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+
+    let output = cmd.output().map_err(|e| format!("Failed to spawn matte process: {e}"))?;
+    let _ = std::fs::remove_file(&temp_in);
+
+    if !output.status.success() {
+        let err = String::from_utf8_lossy(&output.stderr);
+        let _ = std::fs::remove_file(&temp_out);
+        return Err(format!("Matte process failed: {err}"));
+    }
+
+    if !temp_out.exists() {
+        return Err("Matte output was not produced".to_string());
+    }
+
+    let out_bytes = std::fs::read(&temp_out).map_err(|e| e.to_string())?;
+    let _ = std::fs::remove_file(&temp_out);
+    let matte_data_url = format!("data:image/png;base64,{}", BASE64.encode(&out_bytes));
+
+    let res = serde_json::json!({
+        "ok": true,
+        "matte_data_url": matte_data_url,
+        "elapsed_ms": start.elapsed().as_millis()
+    });
+    Ok(res.to_string())
+}
+
+fn handle_request(mut req: Request, base_dir: &Path) {
     if req.method() == &Method::Options {
         let resp = Response::empty(StatusCode(204));
         let _ = req.respond(add_cors_headers(resp));
@@ -96,6 +339,77 @@ fn handle_request(req: Request, base_dir: &Path) {
     };
 
     let pathname = parsed_url.path();
+
+    // AI API Endpoints (LiYing RMBG, Evoto Hair, Matte)
+    if pathname.starts_with("/api/") {
+        if pathname == "/api/ping" {
+            let resp = with_content_type(Response::from_string(r#"{"ok":true,"app":"DEVSTU"}"#), "application/json");
+            let _ = req.respond(add_cors_headers(resp));
+            return;
+        }
+
+        if pathname == "/api/liying_change_background" {
+            let mut body_str = String::new();
+            let _ = req.as_reader().read_to_string(&mut body_str);
+            let v: serde_json::Value = serde_json::from_str(&body_str).unwrap_or(serde_json::Value::Null);
+            let img_b64 = v.get("image_base64").and_then(|x| x.as_str()).unwrap_or("");
+            let color = v.get("color").and_then(|x| x.as_str()).unwrap_or("blue");
+            let transparent = v.get("transparent").and_then(|x| x.as_bool()).unwrap_or(false);
+            let straighten = v.get("straighten").and_then(|x| x.as_bool()).unwrap_or(false);
+            let level_only = v.get("level_only").and_then(|x| x.as_bool()).unwrap_or(false);
+
+            match liying_change_background(img_b64, color, transparent, straighten, level_only, base_dir) {
+                Ok(payload) => {
+                    let resp = with_content_type(Response::from_string(payload), "application/json");
+                    let _ = req.respond(add_cors_headers(resp));
+                    return;
+                }
+                Err(e) => {
+                    let err_json = format!(r#"{{"ok":false,"error":{}}}"#, serde_json::to_string(&e).unwrap_or_default());
+                    let resp = with_content_type(Response::from_string(err_json).with_status_code(StatusCode(500)), "application/json");
+                    let _ = req.respond(add_cors_headers(resp));
+                    return;
+                }
+            }
+        }
+
+        if pathname == "/api/evoto_hair_dye" {
+            let mut body_str = String::new();
+            let _ = req.as_reader().read_to_string(&mut body_str);
+            match evoto_hair_dye_process(&body_str, base_dir) {
+                Ok(payload) => {
+                    let resp = with_content_type(Response::from_string(payload), "application/json");
+                    let _ = req.respond(add_cors_headers(resp));
+                    return;
+                }
+                Err(e) => {
+                    let err_json = format!(r#"{{"ok":false,"error":{}}}"#, serde_json::to_string(&e).unwrap_or_default());
+                    let resp = with_content_type(Response::from_string(err_json).with_status_code(StatusCode(500)), "application/json");
+                    let _ = req.respond(add_cors_headers(resp));
+                    return;
+                }
+            }
+        }
+
+        if pathname == "/api/extract_highres_matte" {
+            let mut body_str = String::new();
+            let _ = req.as_reader().read_to_string(&mut body_str);
+            match extract_highres_matte(&body_str, base_dir) {
+                Ok(payload) => {
+                    let resp = with_content_type(Response::from_string(payload), "application/json");
+                    let _ = req.respond(add_cors_headers(resp));
+                    return;
+                }
+                Err(e) => {
+                    let err_json = format!(r#"{{"ok":false,"error":{}}}"#, serde_json::to_string(&e).unwrap_or_default());
+                    let resp = with_content_type(Response::from_string(err_json).with_status_code(StatusCode(500)), "application/json");
+                    let _ = req.respond(add_cors_headers(resp));
+                    return;
+                }
+            }
+        }
+    }
+
 
     // 1. Emulate /__native/... routes
     if pathname.starts_with("/__native/") {

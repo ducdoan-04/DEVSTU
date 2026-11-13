@@ -6,7 +6,7 @@
      img-src qr.sepay.vn: ảnh mã VietQR khi người dùng mua Premium bằng chuyển khoản; hoangphucphoto.com + R2 của Kho (332e85c5….r2.cloudflarestorage.com — chỉ tài khoản R2 này, rà bảo mật 10/11):
      nút "Chỉnh ảnh này ngay trên Fotoreto" của Kho ảnh RAW — hỏi thông tin file + tải file RAW người dùng bấm, ảnh thẻ sản phẩm; shotpik.com: "Chỉnh ảnh Shotpik" — chỉ ĐỌC dữ liệu khách chọn của album theo link người dùng dán, không gửi ảnh).
      Worker giải mã HEIC/RAW nhận chính sách riêng từ file của chúng, nên không bị chặn. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://image.shotpik.com https://qr.sepay.vn  ; connect-src 'self'  https://shotpik.com  https://332e85c59c5198726134adc11e42c78d.r2.cloudflarestorage.com; font-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://image.shotpik.com https://qr.sepay.vn ; connect-src 'self' blob: data: https://shotpik.com https://332e85c59c5198726134adc11e42c78d.r2.cloudflarestorage.com; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <!-- iOS: không tự biến email / số điện thoại / địa chỉ thành link (21/10 tối — chữ trong hộp bị tách cột) -->
 <meta name="format-detection" content="telephone=no, email=no, address=no, date=no">
@@ -24,6 +24,9 @@
 <body>
 <div id="app"></div>
 <noscript><p style="padding:24px;color:#fff;font-family:system-ui">App cần bật JavaScript để chạy.</p></noscript>
+<script src="assets/vision_bundle.js"></script>
+<script type="module" src="assets/ai_masks.js"></script>
+<script src="assets/collabs_devstu_ai.js"></script>
 <script type="module" src="assets/app-7UAGS7H2.js" data-no-optimize="1" data-no-defer="1" data-cfasync="false"></script>
 </body>
 </html>
