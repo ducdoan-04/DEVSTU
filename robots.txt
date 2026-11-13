@@ -1,0 +1,4 @@
+# app.fotoreto.com là app chỉnh ảnh, không phải trang để tìm kiếm hay thu thập: trang giới thiệu, blog ở https://fotoreto.com
+# Không cho máy thu thập (kể cả máy thu thập dữ liệu huấn luyện AI) tải mã, mô hình, bộ màu của app.
+User-agent: *
+Disallow: /

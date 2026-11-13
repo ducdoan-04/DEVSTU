@@ -1,0 +1,13 @@
+Thư viện giải mã HEIC/HEIF dùng trong HPphoto (chỉ tải khi người dùng mở file HEIC).
+Nạp riêng dưới dạng file .wasm; người dùng có thể thay bằng bản khác cùng giao diện.
+
+libheif 1.23.5 — https://github.com/strukturag/libheif
+  Copyright (c) Dirk Farin, struktur AG. GNU LGPL 3.0 (xem LICENSE; LGPL 3 dựa trên GPL 3, xem GPL-3.txt).
+
+Bản WebAssembly này đóng gói kèm các bộ giải mã sau (mã nguồn tại đường dẫn tương ứng):
+  libde265 — https://github.com/strukturag/libde265 — GNU LGPL 3.0
+  dav1d    — https://code.videolan.org/videolan/dav1d — BSD 2-Clause
+  libaom   — https://aomedia.googlesource.com/aom — BSD 2-Clause + AOMedia Patent License 1.0
+  OpenJPEG — https://github.com/uclouvain/openjpeg — BSD 2-Clause
+
+HPphoto không sửa mã nguồn các thư viện trên.

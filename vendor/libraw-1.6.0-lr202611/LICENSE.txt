@@ -1,0 +1,15 @@
+Thư viện giải mã RAW dùng trong Fotoreto. Nạp riêng dưới dạng file .wasm, người dùng có thể thay bằng bản khác.
+
+libraw-wasm 1.6.0 (lớp bọc JavaScript/WebAssembly) — https://github.com/ybouane/LibRaw-Wasm (thẻ v1.6.0)
+  Giấy phép ISC.
+
+LibRaw 0.23.0-Snapshot202611 — https://www.libraw.org
+  Mã nguồn: https://github.com/LibRaw/LibRaw, commit a9a14b1970d188c25dade81f8326ff00a6e33649 (08/11/2026).
+  Copyright (C) 2008-2026 LibRaw LLC. Dùng theo GNU LGPL 2.1 (hoặc CDDL 1.0, tuỳ chọn).
+
+Little CMS 2.19.1 — https://www.littlecms.com
+  Copyright (c) 1998-2026 Marti Maria Saguer. Giấy phép MIT.
+
+Cách dựng (13/11/2026): compileLibraw.sh của LibRaw-Wasm v1.6.0, emcc 5.0.7, giữ nguyên mọi cờ; chỉ đổi bước tải LibRaw thành
+"git clone https://github.com/LibRaw/LibRaw.git LibRawSource && git -C LibRawSource checkout a9a14b19". Fotoreto không sửa mã nguồn các thư viện trên.
+Toàn văn giấy phép GNU LGPL 2.1 của LibRaw: xem LGPL-2.1.txt trong cùng thư mục.

@@ -1,0 +1,15 @@
+Nhận diện khuôn mặt dùng trong HPphoto (chỉ tải khi dùng công cụ khuôn mặt hoặc lọc ảnh nhắm mắt).
+Chạy hoàn toàn trên máy người dùng, trong worker riêng. Ảnh không được gửi đi đâu.
+
+face-api 1.7.15 — https://github.com/vladmandic/face-api (commit 189226d, 02/2025)
+  Copyright (c) Vladimir Mandic. Giấy phép MIT (xem LICENSE).
+  Dựa trên face-api.js — https://github.com/justadudewhohacks/face-api.js — Copyright (c) 2018 Vincent Mühler, MIT.
+
+Đóng gói kèm TensorFlow.js 4.22.0 — https://github.com/tensorflow/tfjs — Apache License 2.0.
+
+Mô hình (thư mục model/): Tiny Face Detector, SSD MobileNet v1, Face Landmark 68 — đi kèm face-api, MIT.
+Thêm 26/10/2026 (nhóm ảnh theo khuôn mặt ở màn Lọc ảnh): Face Recognition (FaceRecognitionNet, ResNet-34 rút gọn) — cùng kho face-api,
+commit 189226d, thư mục model/, MIT. Tải từ https://raw.githubusercontent.com/vladmandic/face-api/189226d/model/
+  face_recognition_model.bin                    sha256 b413e420d6840b2775fba32008db6f3cddb07d485967fb42cfcf379c16a8c589
+  face_recognition_model-weights_manifest.json  sha256 cbaffa501b0b9275a12b63357a6843e7e30c054e1c9151e1a5f879b26e32986b
+HPphoto không sửa mã nguồn các thư viện trên (chỉ bỏ dòng sourceMappingURL ở cuối face-api.esm.js).

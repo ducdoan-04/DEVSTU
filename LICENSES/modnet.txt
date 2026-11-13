@@ -1,0 +1,20 @@
+MODNet (portrait matting) — vendor/modnet/model_uint8.onnx
+
+Model: MODNet: Trimap-Free Portrait Matting in Real Time, Zhanghan Ke, Jiayu Sun, Kaican Li, Qiong Yan, Rynson W.H. Lau —
+https://github.com/ZHKKKe/MODNet
+ONNX weights (uint8 quantized): Xenova/modnet
+https://huggingface.co/Xenova/modnet  (file onnx/model_uint8.onnx,
+sha256 7bad6522b3cde60246e69e234b7786337ef9c88abc790ee5c1aaa6e535b0c61d)
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+in compliance with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License
+is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+or implied. See the License for the specific language governing permissions and limitations under
+the License.
+
+Note: only the Small model of Depth Anything V2 is Apache-2.0; the Base/Large/Giant models are
+CC-BY-NC-4.0 and must not be used in this app.

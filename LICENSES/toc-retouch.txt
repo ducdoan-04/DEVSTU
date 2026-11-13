@@ -1,0 +1,12 @@
+Fotoreto hair tidy model ("Làm gọn tóc AI") — vendor/skin-ai/toc-retouch-v1.onnx
+
+Own model of Fotoreto / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 03/11/2026 from scratch on
+the author's own before / after hair retouch photo pairs with tools/train-da (train.py: U-Net, ~2.7 million parameters,
+Conv / ReLU / max-pool / bilinear upsampling only). No third-party weights, code or datasets are included.
+Weights stored as float16 (tools/onnx-fp16-store.py), computed in float32.
+
+sha256 70711a474b8c6c9e1313ce81ad7d0fdbb809a16c8bf4c1f9acf7fac361111ac0  toc-retouch-v1.onnx
+
+Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the Fotoreto app.
+
+Runs with ONNX Runtime Web 1.20.1 (MIT) — see onnxruntime.txt.

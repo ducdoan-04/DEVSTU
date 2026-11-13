@@ -1,0 +1,25 @@
+{
+  "name": "devstu",
+  "version": "1.0.0",
+  "description": "DEVSTU AI Photo Retouching Suite",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "start": "node server.mjs",
+    "app": "start msedge --app=http://127.0.0.1:3000"
+  },
+  "keywords": [
+    "devstu",
+    "ai-photo-retouching",
+    "birefnet",
+    "lama",
+    "scunet",
+    "depth-anything",
+    "mediapipe"
+  ],
+  "author": "ducdoan-04 <ducdoan04.work@gmail.com>",
+  "license": "MIT"
+}

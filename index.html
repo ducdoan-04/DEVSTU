@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<!-- Chỉ chạy mã của chính app, không nạp gì từ nơi khác, không gửi ảnh đi đâu (connect-src 'self' + máy chủ tài khoản devstu.local — chỉ trao đổi tài khoản / quyền dùng, không bao giờ có ảnh;
+     img-src qr.sepay.vn: ảnh mã VietQR khi người dùng mua Premium bằng chuyển khoản; hoangphucphoto.com + R2 của Kho (332e85c5….r2.cloudflarestorage.com — chỉ tài khoản R2 này, rà bảo mật 10/11):
+     nút "Chỉnh ảnh này ngay trên Fotoreto" của Kho ảnh RAW — hỏi thông tin file + tải file RAW người dùng bấm, ảnh thẻ sản phẩm; shotpik.com: "Chỉnh ảnh Shotpik" — chỉ ĐỌC dữ liệu khách chọn của album theo link người dùng dán, không gửi ảnh).
+     Worker giải mã HEIC/RAW nhận chính sách riêng từ file của chúng, nên không bị chặn. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://image.shotpik.com https://qr.sepay.vn  ; connect-src 'self'  https://shotpik.com  https://332e85c59c5198726134adc11e42c78d.r2.cloudflarestorage.com; font-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<!-- iOS: không tự biến email / số điện thoại / địa chỉ thành link (21/10 tối — chữ trong hộp bị tách cột) -->
+<meta name="format-detection" content="telephone=no, email=no, address=no, date=no">
+<title>DEVSTU · Chỉnh ảnh hàng loạt dễ dàng</title>
+<meta name="description" content="DEVSTU · Chỉnh sửa ảnh AI chuyên nghiệp trên thiết bị, không tải ảnh lên máy chủ. Tự cân sáng, cân màu, 111 bộ màu, mở ảnh RAW, xử lý hàng loạt.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#141416">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/fr-favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/fr-favicon-48.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/fr-icon-192.png">
+<link rel="apple-touch-icon" href="icons/fr-apple-touch-icon.png">
+<link rel="stylesheet" href="assets/app-F7QCZXV2.css">
+</head>
+<body>
+<div id="app"></div>
+<noscript><p style="padding:24px;color:#fff;font-family:system-ui">App cần bật JavaScript để chạy.</p></noscript>
+<script type="module" src="assets/app-7UAGS7H2.js" data-no-optimize="1" data-no-defer="1" data-cfasync="false"></script>
+</body>
+</html>
