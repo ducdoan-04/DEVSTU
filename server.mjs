@@ -2,6 +2,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { handleAiRequest } from './scripts/ai_api_handler.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -59,6 +60,12 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(204);
       res.end();
       return;
+    }
+
+    // AI API routes
+    if (pathname.startsWith('/api/')) {
+      const handled = await handleAiRequest(pathname, req, res);
+      if (handled) return;
     }
 
     // 1. Emulate /__native/... routes

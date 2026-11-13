@@ -1021,3 +1021,15 @@
   align-items: center;
   justify-content: center;
 }
+
+/* Panel Tab Visibility for Collabs Retouch Crop & Background Tabs */
+.panel[data-mt=crop] > [data-mt]:not([data-mt=crop]),
+.panel[data-mt=phongnen] > [data-mt]:not([data-mt=phongnen]) {
+  display: none !important;
+}
+.panel[data-mt=crop] > [data-mt=crop],
+.panel[data-mt=phongnen] > [data-mt=phongnen] {
+  display: flex !important;
+  flex-direction: column;
+}
+
