@@ -437,6 +437,9 @@
   background: #3b7bff;
   border-color: #3b7bff;
 }
+.crop-action-btn.primary.active {
+  background: #1d4ed8;
+}
 .crop-action-btn.secondary {
   background: var(--bg-card);
   color: var(--text-secondary);
@@ -537,19 +540,29 @@
 .crop-icon-btn {
   height: 32px;
   border-radius: 6px;
-  border: 1px solid transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background: var(--bg-card);
   color: var(--text-secondary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: all 0.15s;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 .crop-icon-btn:hover {
   background: var(--bg-card-hover);
   color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
 }
+.crop-icon-btn span, .crop-icon-btn svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
 .crop-ai-straighten-row {
   display: flex;
   align-items: center;
@@ -610,132 +623,275 @@
 
 /* LIYING AI ENGINE CARD */
 .liying-bg-card {
-  border-radius: 8px;
-  background: #20232a;
-  border: 1px solid rgba(59, 130, 246, 0.25);
   padding: 10px;
+  border-radius: 10px;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(41, 109, 246, 0.11), transparent 55%),
+    linear-gradient(160deg, #1b1d25 0%, #13151b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 6px 18px rgba(0, 0, 0, 0.36);
+  margin-bottom: 6px;
+  box-sizing: border-box;
 }
 .liying-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 .liying-badge-title {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 7px;
+  min-width: 0;
 }
 .liying-sparkle {
-  color: #60a5fa;
-  display: flex;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.24), rgba(248, 212, 66, 0.16));
+  border: 1px solid rgba(96, 165, 250, 0.34);
+  color: #93c5fd;
+  flex-shrink: 0;
+}
+.liying-sparkle svg {
+  display: block;
+  width: 13px;
+  height: 13px;
 }
 .liying-title-stack {
   display: flex;
   align-items: baseline;
   gap: 6px;
+  min-width: 0;
 }
 .liying-title-stack strong {
-  font-size: 12.5px;
-  color: #ffffff;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--text-primary);
+  letter-spacing: 0.1px;
 }
 .liying-subtitle {
   font-size: 10px;
-  color: #93c5fd;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 .liying-tag {
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(37, 99, 235, 0.2);
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  letter-spacing: 0.55px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(41, 109, 246, 0.15);
+  color: #7db0ff;
+  border: 1px solid rgba(59, 130, 246, 0.32);
+  flex-shrink: 0;
 }
+
 .liying-checkbox-label {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11.5px;
+  gap: 8px;
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11px;
   color: var(--text-primary);
   cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  box-sizing: border-box;
 }
-.liying-preset-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
+.liying-checkbox-label:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.12);
 }
-.liying-color-chip {
-  height: 30px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 6px;
-  border-radius: 6px;
-  border: 1.5px solid var(--border-panel);
-  background: var(--bg-card);
-  color: var(--text-primary);
-  font-size: 10px;
+.liying-option-text {
+  color: #d4d8e1;
   font-weight: 500;
+}
+.liying-checkbox-label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 30px;
+  height: 16px;
+  margin: 0;
+  border-radius: 999px;
+  background: #313542;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
-  transition: all 0.12s;
-  overflow: hidden;
-  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.16s ease, border-color 0.16s ease;
 }
-.liying-color-chip:hover {
-  border-color: var(--border-strong);
-  background: var(--bg-card-hover);
-}
-.liying-color-chip.active {
-  border-color: #2997ff;
-  box-shadow: 0 0 0 1px #2997ff;
-  color: #ffffff;
-  font-weight: 600;
-}
-.chip-dot {
+.liying-checkbox-label input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.2);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  transition: transform 0.16s ease;
 }
-.liying-actions-row {
+.liying-checkbox-label input[type="checkbox"]:checked {
+  background: var(--evoto-blue);
+  border-color: #60a5fa;
+}
+.liying-checkbox-label input[type="checkbox"]:checked::after {
+  transform: translateX(14px);
+}
+
+.liying-preset-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+.liying-color-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  height: 50px;
+  padding: 5px 2px 4px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  box-sizing: border-box;
+}
+.liying-color-chip span:last-child {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+.liying-color-chip:hover {
+  background: rgba(255, 255, 255, 0.075);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.liying-color-chip.active {
+  background: rgba(41, 109, 246, 0.16);
+  border-color: #4f8dff;
+  color: #eef4ff;
+  font-weight: 600;
+  box-shadow:
+    0 0 0 1px rgba(79, 141, 255, 0.45) inset,
+    0 4px 12px rgba(41, 109, 246, 0.22);
+}
+.chip-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.chip-dot-light {
+  border-color: rgba(0, 0, 0, 0.25);
+}
+.chip-transparent {
+  background-color: #d4d6dc;
+  background-image:
+    linear-gradient(45deg, #ffffff 25%, transparent 25%),
+    linear-gradient(-45deg, #ffffff 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ffffff 75%),
+    linear-gradient(-45deg, transparent 75%, #ffffff 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+}
+
+.liying-actions-row {
+  display: flex;
   gap: 5px;
   margin-top: 2px;
 }
-.liying-btn {
-  height: 28px;
-  border-radius: 6px;
+.btn-liying-primary {
+  flex: 1.35;
+  min-width: 0;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 8px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #296df6 0%, #1d4ed8 100%);
+  border: 1px solid rgba(96, 165, 250, 0.65);
+  color: #ffffff;
   font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
-  border: 1px solid var(--border-subtle);
+  transition: all 0.14s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 3px 10px rgba(37, 99, 235, 0.36);
+  box-sizing: border-box;
+}
+.btn-liying-primary:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 4px 14px rgba(37, 99, 235, 0.5);
+  transform: translateY(-0.5px);
+}
+.btn-liying-primary svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+.btn-liying-secondary {
+  flex: 0.9;
+  min-width: 0;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
+  padding: 0 6px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  color: #d4d8e1;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  box-sizing: border-box;
 }
-.liying-btn.primary {
-  background: var(--evoto-blue);
-  border-color: var(--evoto-blue);
-  color: #fff;
-}
-.liying-btn.primary:hover {
-  background: #3b7bff;
-}
-.liying-btn.secondary {
-  background: var(--bg-card);
-  color: var(--text-secondary);
-}
-.liying-btn.secondary:hover {
-  color: #fff;
-  border-color: var(--border-strong);
+.btn-liying-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: translateY(-0.5px);
 }
 
 .bg-type-tabs {

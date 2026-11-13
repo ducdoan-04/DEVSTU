@@ -3509,6 +3509,11 @@ var EVOTO_HAIR_SPECS = {
   h13: [[0.459, 0.502, 0.376], 0.18, -0.14, 0.28, 0.80]
 };
 
+
+var SPARKLE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.2L20.3 10l-6.2 2.1L12 18.3l-2.1-6.2L3.7 10l6.2-1.8L12 2zm7 12l1.1 3.1L23.2 18l-3.1 1.1L19 22.2l-1.1-3.1L14.8 18l3.1-.9L19 14z"/></svg>';
+var FLIP_H_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M4 18l6-6-6-6v12zm16 0l-6-6 6-6v12z"/></svg>';
+var FLIP_V_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M18 4l-6 6-6-6h12zm0 16l-6-6-6 6h12z"/></svg>';
+
 function createCollabsHistogram(e) {
   var wrap = d("div", { class: "collabs-hist-wrap" });
   var head = d("div", { class: "collabs-hist-head" },
@@ -3836,9 +3841,7 @@ function createCollabsCropTab(e) {
   var rotRightBtn = d("button", { type: "button", class: "crop-icon-btn", title: a("Xoay phải 90°") }, G(D.rotR, 16));
   rotRightBtn.onclick = function() { if (A.current) bu([A.current], 1); };
 
-  var flipHBtn = d("button", { type: "button", class: "crop-icon-btn", title: a("Lật ngang") },
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M4 18l6-6-6-6v12zm16 0l-6-6 6-6v12z"/></svg>'
-  );
+  var flipHBtn = d("button", { type: "button", class: "crop-icon-btn", title: a("Lật ngang") }, G(FLIP_H_SVG, 16));
   flipHBtn.onclick = function() {
     var photo = A.current;
     if (photo) {
@@ -3849,9 +3852,7 @@ function createCollabsCropTab(e) {
     }
   };
 
-  var flipVBtn = d("button", { type: "button", class: "crop-icon-btn", title: a("Lật dọc") },
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M18 4l-6 6-6-6h12zm0 16l-6-6-6 6h12z"/></svg>'
-  );
+  var flipVBtn = d("button", { type: "button", class: "crop-icon-btn", title: a("Lật dọc") }, G(FLIP_V_SVG, 16));
   flipVBtn.onclick = function() {
     var photo = A.current;
     if (photo) {
@@ -4039,9 +4040,7 @@ function createCollabsBgTab(e) {
 
   var cardHeader = d("div", { class: "liying-card-header" },
     d("div", { class: "liying-badge-title" },
-      d("span", { class: "liying-sparkle" },
-        '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.2L20.3 10l-6.2 2.1L12 18.3l-2.1-6.2L3.7 10l6.2-1.8L12 2zm7 12l1.1 3.1L23.2 18l-3.1 1.1L19 22.2l-1.1-3.1L14.8 18l3.1-.9L19 14z"/></svg>'
-      ),
+      d("span", { class: "liying-sparkle" }, G(SPARKLE_SVG, 14)),
       d("div", { class: "liying-title-stack" },
         d("strong", null, "LiYing AI"),
         d("span", { class: "liying-subtitle" }, "RMBG + Pose")
@@ -4052,13 +4051,13 @@ function createCollabsBgTab(e) {
 
   var straightenCb = d("input", { type: "checkbox", id: "liying-straighten-cb" });
   var straightenLabel = d("label", { class: "liying-checkbox-label", title: a("Tự động nhận diện tư thế hai vai, xoay cân bằng tư thế và căn giữa mặt") },
-    d("span", null, a("Tự cân bằng vai khi tách nền")),
+    d("span", { class: "liying-option-text" }, a("Tự cân bằng vai khi tách nền")),
     straightenCb
   );
 
   var BG_CHIPS = [
     { id: "blue", label: a("Xanh thẻ"), color: "#628bce", bdIdx: 0, rgb: [98, 139, 206] },
-    { id: "white", label: a("Trắng"), color: "#ffffff", bdIdx: 1, rgb: [255, 255, 255] },
+    { id: "white", label: a("Trắng"), color: "#ffffff", bdIdx: 1, rgb: [255, 255, 255], isLight: !0 },
     { id: "red", label: a("Đỏ"), color: "#d74532", bdIdx: 2, rgb: [215, 69, 50] },
     { id: "transparent", label: a("Trong suốt"), color: "transparent", isTrans: !0, bdIdx: -1 },
     { id: "darkblue", label: a("Xanh đậm"), color: "#1c4b82", bdIdx: 3, rgb: [28, 75, 130] },
@@ -4073,11 +4072,10 @@ function createCollabsBgTab(e) {
   for (var chip of BG_CHIPS) {
     (function(item) {
       var isAct = item.id === selColor.id;
-      var dotStyle = item.isTrans
-        ? "background: repeating-conic-gradient(#808080 0% 25%, #fff 0% 50%) 50% / 6px 6px"
-        : "background:" + item.color;
-      var btn = d("button", { type: "button", class: "liying-color-chip" + (isAct ? " active" : "") },
-        d("span", { class: "chip-dot", style: dotStyle }),
+      var dotClass = "chip-dot" + (item.isLight ? " chip-dot-light" : "") + (item.isTrans ? " chip-transparent" : "");
+      var dotStyle = item.isTrans ? "" : ("background:" + item.color);
+      var btn = d("button", { type: "button", class: "liying-color-chip" + (isAct ? " active" : ""), title: item.label },
+        d("span", { class: dotClass, style: dotStyle }),
         d("span", null, item.label)
       );
       btn.onclick = function() {
@@ -4090,9 +4088,9 @@ function createCollabsBgTab(e) {
   }
 
   // Action Buttons
-  var applyBgBtn = d("button", { type: "button", class: "liying-btn primary" },
-    '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.2L20.3 10l-6.2 2.1L12 18.3l-2.1-6.2L3.7 10l6.2-1.8L12 2z"/></svg>',
-    a("Tách & Thay nền")
+  var applyBgBtn = d("button", { type: "button", class: "btn-liying-primary" },
+    G(SPARKLE_SVG, 12),
+    d("span", null, a("Tách & Thay nền"))
   );
   applyBgBtn.onclick = async function() {
     var photo = A.current;
@@ -4121,7 +4119,7 @@ function createCollabsBgTab(e) {
     tt(a("Đã tách và thay nền {0} thành công ✓", selColor.label), 4e3);
   };
 
-  var levelOnlyBtn = d("button", { type: "button", class: "liying-btn secondary", title: a("Tự cân bằng vai và tư thế") },
+  var levelOnlyBtn = d("button", { type: "button", class: "btn-liying-secondary", title: a("Tự cân bằng vai và tư thế") },
     "↔ " + a("Cân vai")
   );
   levelOnlyBtn.onclick = async function() {
@@ -4132,7 +4130,7 @@ function createCollabsBgTab(e) {
     tt(a("Đã cân bằng hai vai người mẫu ✓"), 3e3);
   };
 
-  var cancelBgBtn = d("button", { type: "button", class: "liying-btn secondary", title: a("Hủy thay nền, trả lại nền gốc") },
+  var cancelBgBtn = d("button", { type: "button", class: "btn-liying-secondary", title: a("Hủy thay nền, trả lại nền gốc") },
     "✕ " + a("Hủy")
   );
   cancelBgBtn.onclick = function() {
