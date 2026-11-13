@@ -131,7 +131,8 @@ export async function handleAiRequest(pathname, req, res) {
       darken = 0,
       shine = 0,
       gray = 0,
-      unify = 0
+      unify = 0,
+      smooth = 0
     } = body;
 
     if (!image_base64) {
@@ -166,7 +167,8 @@ export async function handleAiRequest(pathname, req, res) {
       '--darken', String(darken),
       '--shine', String(shine),
       '--gray', String(gray),
-      '--unify', String(unify)
+      '--unify', String(unify),
+      '--smooth', String(smooth)
     ];
     if (mask_base64 && fs.existsSync(tempMask)) {
       args.push('--mask', tempMask);

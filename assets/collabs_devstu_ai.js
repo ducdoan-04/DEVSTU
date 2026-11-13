@@ -183,6 +183,7 @@
     var shine = typeof options.shine === 'number' ? options.shine : 0;
     var gray = typeof options.gray === 'number' ? options.gray : 0;
     var unify = typeof options.unify === 'number' ? options.unify : 0;
+    var smooth = typeof options.smooth === 'number' ? options.smooth : 0;
 
     var resp = await fetch('/api/evoto_hair_dye', {
       method: 'POST',
@@ -195,7 +196,8 @@
         darken: darken,
         shine: shine,
         gray: gray,
-        unify: unify
+        unify: unify,
+        smooth: smooth
       })
     });
 
