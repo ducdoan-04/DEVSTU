@@ -6,3 +6,123 @@
 .thumb .thumb-name{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:12px 6px 3px 6px;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.5) 60%,transparent 100%);color:#fff;font-size:11px;font-weight:500;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;pointer-events:none;font-family:inherit;text-shadow:0 1px 2px rgba(0,0,0,.9)}
 .thumb .thumb-name ~ .stars, .thumb:has(.thumb-name) .stars{bottom:18px}
 .thumb .thumb-name ~ .vc-badge, .thumb:has(.thumb-name) .vc-badge{bottom:18px}
+
+/* --- PRO HAIR STYLING (COLLABS RETOUCH / EVOTO) --- */
+.pro-hair-panel {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pro-hair-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pro-hair-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+}
+.pro-hair-title-wrap svg {
+  color: #2997ff;
+}
+.pro-hair-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #2997ff 0%, #a259ff 100%);
+  color: #fff;
+}
+.pro-hair-desc {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--tx-3, #a8a8b0);
+  margin: 0;
+}
+.pro-hair-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 4px 0 8px 0;
+}
+.pro-hair-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-radius: 7px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: #252730;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  min-width: 0;
+}
+.pro-hair-card:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+.pro-hair-card.active {
+  border-color: #2997ff;
+  box-shadow: 0 0 0 1.5px #2997ff, 0 2px 8px rgba(41, 151, 255, 0.4);
+}
+.pro-swatch-prev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 30px;
+  position: relative;
+}
+.pro-swatch-prev.none-prev {
+  background: #1c1c20;
+  color: #8e8e96;
+  font-size: 14px;
+  font-weight: bold;
+}
+.pro-swatch-prev::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -35deg,
+    rgba(255, 255, 255, 0.08) 0px,
+    rgba(255, 255, 255, 0.08) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  pointer-events: none;
+}
+.pro-swatch-badge {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 15px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 1px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.2px;
+}
+.pro-hair-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pro-hair-reset-btn {
+  align-self: flex-end;
+  margin-top: 4px;
+  font-size: 12px;
+}
