@@ -115,8 +115,31 @@
     return null;
   }
 
+  // Restore original photo if modified by LiYing or Evoto AI
+  function restoreOriginalPhoto(photo) {
+    if (!photo || !photo._originalBackup) return false;
+    var b = photo._originalBackup;
+    photo.file = b.file;
+    photo.src = b.src;
+    if (b.thumb) photo.thumb = b.thumb;
+    if (b.editedThumb) photo.editedThumb = b.editedThumb;
+    if (b.dataUrl) photo._devstuDataUrl = b.dataUrl;
+    photo._isAiVersion = false;
+
+    if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
+      try { window._devstuStage.loadPhoto(photo); } catch (e) {}
+    }
+    if (window._devstuA) {
+      window._devstuA.emit('photos');
+      window._devstuA.emit('current');
+    }
+    return true;
+  }
+
   // Execute LiYing Background Replacement (RMBG-1.4 + Pose Alignment)
+  // UPDATED: Modifies current photo IN-PLACE with undo/restore support, NEVER creates extra files!
   async function runLiyingBackgroundReplacement(photo, options) {
+    photo = photo || (window._devstuA ? window._devstuA.current : null);
     if (!photo) throw new Error('Không có ảnh đang chọn');
     options = options || {};
 
@@ -145,32 +168,60 @@
       throw new Error(res && res.error ? res.error : 'Máy chủ LiYing AI không phản hồi');
     }
 
-    var baseName = (photo.name || 'photo').replace(/\.[^.]+$/, '');
+    // Backup original photo if not yet stored
+    if (!photo._originalBackup) {
+      photo._originalBackup = {
+        file: photo.file,
+        src: photo.src,
+        thumb: photo.thumb,
+        editedThumb: photo.editedThumb,
+        dataUrl: photo._devstuDataUrl || dataUrl
+      };
+    }
+
+    var baseName = (photo.name || (photo.file && photo.file.name) || 'photo').replace(/\.[^.]+$/, '');
     var suffix = levelOnly ? '_can_vai.png' : ('_nen_' + (options.label || color) + '.png');
     var newFile = dataURLtoFile(res.data_url, baseName + suffix);
 
-    if (typeof window._devstuAddFiles === 'function') {
-      var prevLen = window._devstuA ? window._devstuA.photos.length : 0;
-      await window._devstuAddFiles([newFile], true);
-      if (window._devstuA) {
-        var added = window._devstuA.photos[window._devstuA.photos.length - 1];
-        if (added) {
-          added._isAiVersion = true;
-          added._originalPhotoRef = photo._originalPhotoRef || photo;
-          if (window._devstuSelectPhoto) {
-            window._devstuSelectPhoto(added.id);
-          }
-        }
+    // Apply in-place onto the current photo
+    photo.file = newFile;
+    photo.src = URL.createObjectURL(newFile);
+    photo._devstuDataUrl = res.data_url;
+    photo._isAiVersion = true;
+
+    // Update thumbnail bitmap
+    try {
+      if (typeof createImageBitmap === 'function') {
+        createImageBitmap(newFile, { resizeWidth: 160, resizeHeight: 120, resizeQuality: 'medium' }).then(function(bmp) {
+          photo.thumb = bmp;
+          if (window._devstuA) window._devstuA.emit('thumbs');
+        }).catch(function() {});
       }
+    } catch (e) {}
+
+    // Reload active stage viewer & inform DEVSTU
+    if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
+      try { window._devstuStage.loadPhoto(photo); } catch (e) {}
+    }
+    if (window._devstuA) {
+      window._devstuA.emit('photos');
+      window._devstuA.emit('current');
     }
 
     return res;
   }
 
   // Execute Evoto Hair Dye (H01-H13 + Sliders)
+  // UPDATED: Modifies current photo IN-PLACE with undo/restore support, NEVER creates extra files!
   async function runEvotoHairDye(photo, preset, options) {
+    photo = photo || (window._devstuA ? window._devstuA.current : null);
     if (!photo) throw new Error('Không có ảnh đang chọn');
     options = options || {};
+
+    if (!preset || preset === 'none') {
+      restoreOriginalPhoto(photo);
+      return { ok: true, restored: true };
+    }
 
     var dataUrl = await getPhotoDataUrl(photo);
     if (!dataUrl) throw new Error('Không đọc được dữ liệu ảnh gốc');
@@ -206,23 +257,44 @@
       throw new Error(res && res.error ? res.error : 'Bộ xử lý tóc Collabs Evoto không phản hồi');
     }
 
-    var baseName = (photo.name || 'photo').replace(/\.[^.]+$/, '');
+    // Backup original photo if not yet stored
+    if (!photo._originalBackup) {
+      photo._originalBackup = {
+        file: photo.file,
+        src: photo.src,
+        thumb: photo.thumb,
+        editedThumb: photo.editedThumb,
+        dataUrl: photo._devstuDataUrl || dataUrl
+      };
+    }
+
+    var baseName = (photo.name || (photo.file && photo.file.name) || 'photo').replace(/\.[^.]+$/, '');
     var code = (options.code || preset).toUpperCase();
     var newFile = dataURLtoFile(res.data_url, baseName + '_' + code + '.png');
 
-    if (typeof window._devstuAddFiles === 'function') {
-      var prevLen = window._devstuA ? window._devstuA.photos.length : 0;
-      await window._devstuAddFiles([newFile], true);
-      if (window._devstuA) {
-        var added = window._devstuA.photos[window._devstuA.photos.length - 1];
-        if (added) {
-          added._isAiVersion = true;
-          added._originalPhotoRef = photo._originalPhotoRef || photo;
-          if (window._devstuSelectPhoto) {
-            window._devstuSelectPhoto(added.id);
-          }
-        }
+    // Apply in-place onto the current photo
+    photo.file = newFile;
+    photo.src = URL.createObjectURL(newFile);
+    photo._devstuDataUrl = res.data_url;
+    photo._isAiVersion = true;
+
+    // Update thumbnail bitmap
+    try {
+      if (typeof createImageBitmap === 'function') {
+        createImageBitmap(newFile, { resizeWidth: 160, resizeHeight: 120, resizeQuality: 'medium' }).then(function(bmp) {
+          photo.thumb = bmp;
+          if (window._devstuA) window._devstuA.emit('thumbs');
+        }).catch(function() {});
       }
+    } catch (e) {}
+
+    // Reload active stage viewer & inform DEVSTU
+    if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
+      try { window._devstuStage.loadPhoto(photo); } catch (e) {}
+    }
+    if (window._devstuA) {
+      window._devstuA.emit('photos');
+      window._devstuA.emit('current');
     }
 
     return res;
@@ -234,7 +306,8 @@
     getPhotoDataUrl: getPhotoDataUrl,
     ensurePhotoAiMask: ensurePhotoAiMask,
     runLiyingBackgroundReplacement: runLiyingBackgroundReplacement,
-    runEvotoHairDye: runEvotoHairDye
+    runEvotoHairDye: runEvotoHairDye,
+    restoreOriginalPhoto: restoreOriginalPhoto
   };
 
 })(window);

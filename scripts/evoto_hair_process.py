@@ -205,18 +205,76 @@ def main():
     h, w = img_bgr.shape[:2]
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
 
-    # Load neural mask
+    # Load neural mask or segment with MediaPipe
+    hair_mask = None
+    skin_mask = None
+
     if mask_path and os.path.exists(mask_path):
-        mask_rgba = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
-        if mask_rgba.shape[0] != h or mask_rgba.shape[1] != w:
-            mask_rgba = cv2.resize(mask_rgba, (w, h), interpolation=cv2.INTER_LINEAR)
-        # MediaPipe Vision mask: Channel 0 in BGR is B (Hair), Channel 2 is R (Skin)
-        hair_mask = mask_rgba[:, :, 0].astype(np.float32) / 255.0 if mask_rgba.shape[2] >= 3 else np.ones((h, w), dtype=np.float32)
-        skin_mask = mask_rgba[:, :, 2].astype(np.float32) / 255.0 if mask_rgba.shape[2] >= 3 else np.zeros((h, w), dtype=np.float32)
-    else:
-        # Fallback to upper center heuristic
+        try:
+            mask_rgba = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
+            if mask_rgba is not None:
+                if mask_rgba.shape[0] != h or mask_rgba.shape[1] != w:
+                    mask_rgba = cv2.resize(mask_rgba, (w, h), interpolation=cv2.INTER_LINEAR)
+                # MediaPipe Vision mask: Channel 0 in BGR is B (Hair), Channel 2 is R (Skin)
+                if len(mask_rgba.shape) >= 3 and mask_rgba.shape[2] >= 3:
+                    hair_mask = mask_rgba[:, :, 0].astype(np.float32) / 255.0
+                    skin_mask = mask_rgba[:, :, 2].astype(np.float32) / 255.0
+                elif len(mask_rgba.shape) == 2:
+                    hair_mask = mask_rgba.astype(np.float32) / 255.0
+                    skin_mask = np.zeros((h, w), dtype=np.float32)
+        except Exception as e:
+            sys.stderr.write(f"Warning reading mask file: {e}\n")
+
+    if hair_mask is None or skin_mask is None:
+        # Segment hair & skin using MediaPipe Selfie Multiclass model
+        model_candidates = [
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "selfie_multiclass_256x256.tflite"),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "selfie_multiclass_256x256.tflite"),
+            r"F:\Workspace\Code projects\2. Tool Media by Doan\Collabs-Retouch-Pro\public\models\selfie_multiclass_256x256.tflite",
+            r"models\selfie_multiclass_256x256.tflite"
+        ]
+        model_path = None
+        for cand in model_candidates:
+            if os.path.isfile(cand):
+                model_path = os.path.abspath(cand)
+                break
+
+        if model_path:
+            try:
+                import mediapipe as mp
+                from mediapipe.tasks import python
+                from mediapipe.tasks.python import vision
+
+                base_options = python.BaseOptions(model_asset_path=model_path)
+                options = vision.ImageSegmenterOptions(
+                    base_options=base_options,
+                    output_category_mask=False,
+                    output_confidence_masks=True
+                )
+                segmenter = vision.ImageSegmenter.create_from_options(options)
+
+                mp_img = mp.Image(
+                    image_format=mp.ImageFormat.SRGB,
+                    data=cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+                )
+                seg_res = segmenter.segment(mp_img)
+
+                # Class 1: Hair, Class 2: Body Skin, Class 3: Face Skin
+                raw_hair = seg_res.confidence_masks[1].numpy_view().squeeze()
+                raw_skin = (
+                    seg_res.confidence_masks[2].numpy_view().squeeze() +
+                    seg_res.confidence_masks[3].numpy_view().squeeze()
+                )
+
+                hair_mask = cv2.resize(raw_hair, (w, h), interpolation=cv2.INTER_LINEAR)
+                skin_mask = cv2.resize(raw_skin, (w, h), interpolation=cv2.INTER_LINEAR)
+            except Exception as e:
+                sys.stderr.write(f"MediaPipe segmentation warning: {e}\n")
+
+    if hair_mask is None:
         hair_mask = np.zeros((h, w), dtype=np.float32)
         hair_mask[:int(h * 0.5), :] = 0.8
+    if skin_mask is None:
         skin_mask = np.zeros((h, w), dtype=np.float32)
 
     out_rgb = apply_evoto_hair_dye(img_rgb, hair_mask, skin_mask, preset, strength, darken, shine, gray, unify, smooth)
