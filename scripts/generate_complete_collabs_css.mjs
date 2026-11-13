@@ -1072,8 +1072,57 @@ const COMPLETE_CSS = `/* --- DEVSTU COLLABS RETOUCH PRO STYLING (PIXEL-PERFECT) 
 }
 `;
 
+const leftAndGridCss = fs.readFileSync('scripts/extracted_left_and_grid.css', 'utf8');
+const extraLeftCss = `
+/* Extra Left Dock & Library rules for DEVSTU */
+#app.left-collapsed .retouch-left-panel,
+.left-collapsed .retouch-left-panel,
+.retouch-left-panel.hidden {
+  display: none !important;
+}
+
+#library-grid-view.hidden {
+  display: none !important;
+}
+
+.left-dock-container {
+  z-index: 10;
+}
+
+.history-ai-card {
+  margin-bottom: 8px;
+}
+
+.retouch-btn-import {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-panel);
+  color: var(--text-primary);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.retouch-btn-import:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-strong);
+}
+
+.retouch-btn-import.full-w {
+  width: 100%;
+}
+`;
+
+const TOTAL_CSS = COMPLETE_CSS + '\n\n' + leftAndGridCss + '\n\n' + extraLeftCss;
+
 // Save to scripts/collabs_complete_styles.css
-fs.writeFileSync('scripts/collabs_complete_styles.css', COMPLETE_CSS, 'utf8');
+fs.writeFileSync('scripts/collabs_complete_styles.css', TOTAL_CSS, 'utf8');
 console.log('Saved scripts/collabs_complete_styles.css');
 
 // Append to assets/app-F7QCZXV2.css replacing old collabs styling block
@@ -1082,9 +1131,9 @@ const marker = '/* --- DEVSTU COLLABS RETOUCH PRO STYLING';
 const markerIdx = appCss.indexOf(marker);
 
 if (markerIdx !== -1) {
-  appCss = appCss.slice(0, markerIdx) + COMPLETE_CSS;
+  appCss = appCss.slice(0, markerIdx) + TOTAL_CSS;
 } else {
-  appCss = appCss + '\n\n' + COMPLETE_CSS;
+  appCss = appCss + '\n\n' + TOTAL_CSS;
 }
 
 fs.writeFileSync('assets/app-F7QCZXV2.css', appCss, 'utf8');
