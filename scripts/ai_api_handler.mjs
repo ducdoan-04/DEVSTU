@@ -202,5 +202,61 @@ export async function handleAiRequest(pathname, req, res) {
     return true;
   }
 
+  if (pathname === '/api/extract_matte') {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const bodyStr = Buffer.concat(chunks).toString('utf8');
+    let body = {};
+    try { body = JSON.parse(bodyStr); } catch (e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'Invalid JSON body' }));
+      return true;
+    }
+
+    const { image_base64 } = body;
+    if (!image_base64) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'image_base64 is required' }));
+      return true;
+    }
+
+    const pid = process.pid;
+    const now = Date.now();
+    const tempIn = path.join(os.tmpdir(), `devstu_matte_in_${pid}_${now}.png`);
+    const tempOut = path.join(os.tmpdir(), `devstu_matte_out_${pid}_${now}.png`);
+
+    const imgBuf = Buffer.from(image_base64.replace(/^data:image\/[a-zA-Z]+;base64,/, ''), 'base64');
+    fs.writeFileSync(tempIn, imgBuf);
+
+    const scriptPath = path.join(projectRoot, 'scripts', 'extract_matte.py');
+    const py = findPython();
+
+    const pyProc = spawn(py, [scriptPath, tempIn, tempOut], { windowsHide: true });
+    let stderr = '';
+    pyProc.stderr.on('data', d => { stderr += d.toString(); });
+
+    pyProc.on('close', code => {
+      try { if (fs.existsSync(tempIn)) fs.unlinkSync(tempIn); } catch (e) {}
+
+      if (code !== 0 || !fs.existsSync(tempOut)) {
+        try { if (fs.existsSync(tempOut)) fs.unlinkSync(tempOut); } catch (e) {}
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: `Matte extraction failed: ${stderr || code}` }));
+        return;
+      }
+
+      const outBuf = fs.readFileSync(tempOut);
+      try { if (fs.existsSync(tempOut)) fs.unlinkSync(tempOut); } catch (e) {}
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        ok: true,
+        matte_data_url: `data:image/png;base64,${outBuf.toString('base64')}`
+      }));
+    });
+
+    return true;
+  }
+
   return false;
 }

@@ -300,11 +300,277 @@
     return res;
   }
 
+  // Extract high-res RMBG-1.4 matte from backend or cache
+  async function ensurePhotoAiMatte(photo) {
+    if (!photo) return null;
+    if (photo._aiMatteDataUrl) return photo._aiMatteDataUrl;
+
+    var dataUrl = await getPhotoDataUrl(photo);
+    if (!dataUrl) return null;
+
+    try {
+      var resp = await fetch('/api/extract_matte', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_base64: dataUrl })
+      });
+      var res = await resp.json();
+      if (res && res.ok && res.matte_data_url) {
+        photo._aiMatteDataUrl = res.matte_data_url;
+        return res.matte_data_url;
+      }
+    } catch (e) {
+      console.warn('[CollabsAI] extract_matte failed:', e);
+    }
+    return null;
+  }
+
+  function loadImageElement(url) {
+    return new Promise(function(resolve, reject) {
+      var img = new Image();
+      img.onload = function() { resolve(img); };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  // Composite subject and background matching Collabs Retouch Pro Rust SIMD
+  async function applyCollabsBgComposite(photo, options) {
+    photo = photo || (window._devstuA ? window._devstuA.current : null);
+    if (!photo) throw new Error('Không có ảnh đang chọn');
+    options = options || {};
+
+    var mode = options.mode || 'original';
+    if (mode === 'original') {
+      restoreOriginalPhoto(photo);
+      return { ok: true, restored: true };
+    }
+
+    // Ensure original backup
+    if (!photo._originalBackup) {
+      var origUrl = await getPhotoDataUrl(photo);
+      photo._originalBackup = {
+        file: photo.file,
+        src: photo.src,
+        thumb: photo.thumb,
+        editedThumb: photo.editedThumb,
+        dataUrl: photo._devstuDataUrl || origUrl
+      };
+    }
+
+    var baseDataUrl = photo._originalBackup.dataUrl;
+    var matteUrl = photo._aiMatteDataUrl;
+    if (!matteUrl) {
+      try {
+        matteUrl = await ensurePhotoAiMatte(photo);
+      } catch (e) {
+        console.warn('[CollabsAI] ensurePhotoAiMatte error:', e);
+      }
+    }
+    if (!matteUrl) {
+      matteUrl = photo._aiSceneMaskBase64 || photo._aiMaskBase64;
+    }
+    if (!matteUrl) {
+      try {
+        matteUrl = await ensurePhotoAiMask(photo);
+      } catch (e) {
+        console.warn('[CollabsAI] ensurePhotoAiMask error:', e);
+      }
+    }
+    if (!matteUrl) throw new Error('Không trích xuất được mặt nạ nền AI (RMBG-1.4)');
+
+    var origImg = await loadImageElement(baseDataUrl);
+    var maskImg = await loadImageElement(matteUrl);
+
+    var nw = origImg.naturalWidth || photo.width || 1200;
+    var nh = origImg.naturalHeight || photo.height || 1600;
+    var scale = Math.min(1, 2400 / Math.max(nw, nh));
+    var w = Math.max(1, Math.round(nw * scale));
+    var h = Math.max(1, Math.round(nh * scale));
+
+    var outCanvas = document.createElement('canvas');
+    outCanvas.width = w;
+    outCanvas.height = h;
+    var ctx = outCanvas.getContext('2d');
+
+    var bgOpacity = Math.max(0, Math.min(1, (options.opacity !== undefined ? options.opacity : 100) / 100));
+
+    // 1. Draw chosen background
+    if (mode === 'transparent') {
+      ctx.clearRect(0, 0, w, h);
+    } else {
+      if (bgOpacity < 0.999 || options.fillArea === 'outer_only') {
+        ctx.drawImage(origImg, 0, 0, w, h);
+      }
+      ctx.save();
+      if (bgOpacity < 0.999) ctx.globalAlpha = bgOpacity;
+
+      if (mode === 'pure_white') {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+      } else if (mode === 'custom_color') {
+        ctx.fillStyle = /^#[0-9a-fA-F]{6}$/.test(options.color || '') ? options.color : '#e8eef5';
+        ctx.fillRect(0, 0, w, h);
+      } else if (mode === 'custom_image' && options.customImage) {
+        try {
+          var bgImg = await loadImageElement(options.customImage);
+          var bsw = bgImg.naturalWidth || 1;
+          var bsh = bgImg.naturalHeight || 1;
+          var zoom = 1 + Math.max(0, Math.min(100, options.scale || 0)) / 100;
+          var offX = ((options.offsetX || 0) / 100) * w * 0.45;
+          var offY = ((options.offsetY || 0) / 100) * h * 0.45;
+          var dw = w * zoom;
+          var dh = h * zoom;
+          ctx.drawImage(bgImg, (w - dw) * 0.5 + offX, (h - dh) * 0.5 + offY, dw, dh);
+        } catch (_) {
+          ctx.fillStyle = '#e8eef5';
+          ctx.fillRect(0, 0, w, h);
+        }
+      } else {
+        var rGrad = ctx.createRadialGradient(w * 0.5, h * 0.36, w * 0.05, w * 0.5, h * 0.4, Math.max(w, h) * 0.72);
+        if (mode === 'warm_beige') {
+          rGrad.addColorStop(0, '#ad9387');
+          rGrad.addColorStop(1, '#8a7368');
+        } else if (mode === 'studio_grey') {
+          rGrad.addColorStop(0, '#b5b9c0');
+          rGrad.addColorStop(1, '#6f737a');
+        } else if (mode === 'slate_grey_03') {
+          rGrad.addColorStop(0, '#7c7a82');
+          rGrad.addColorStop(1, '#58565f');
+        } else if (mode === 'fabric_02') {
+          rGrad.addColorStop(0, '#555c68');
+          rGrad.addColorStop(1, '#1c1f25');
+        } else if (mode === 'passport_blue') {
+          rGrad.addColorStop(0, '#2e7ad8');
+          rGrad.addColorStop(1, '#2366bf');
+        } else if (mode === 'pastel_pink') {
+          rGrad.addColorStop(0, '#f7dce1');
+          rGrad.addColorStop(1, '#e8bdc6');
+        } else if (mode === 'sage_green') {
+          rGrad.addColorStop(0, '#b2ccb9');
+          rGrad.addColorStop(1, '#8aa694');
+        } else if (mode === 'lavender_mist') {
+          rGrad.addColorStop(0, '#ddd6f3');
+          rGrad.addColorStop(1, '#beb3e0');
+        } else {
+          rGrad.addColorStop(0, '#252830');
+          rGrad.addColorStop(1, '#08090c');
+        }
+        ctx.fillStyle = rGrad;
+        ctx.fillRect(0, 0, w, h);
+      }
+      ctx.restore();
+    }
+
+    // 2. Cutout foreground using continuous neural probability
+    var fgCanvas = document.createElement('canvas');
+    fgCanvas.width = w;
+    fgCanvas.height = h;
+    var fgCtx = fgCanvas.getContext('2d');
+    fgCtx.drawImage(origImg, 0, 0, w, h);
+    var fgData = fgCtx.getImageData(0, 0, w, h);
+
+    var mCanvas = document.createElement('canvas');
+    mCanvas.width = w;
+    mCanvas.height = h;
+    var mCtx = mCanvas.getContext('2d');
+    mCtx.drawImage(maskImg, 0, 0, w, h);
+    var mPixels = mCtx.getImageData(0, 0, w, h).data;
+
+    var edgeShift = -((options.edgeAdjust || 0) / 360);
+    var edgeMode = options.edgeMode || 'auto';
+
+    function smoothstep(lo, hi, x) {
+      var t = Math.max(0, Math.min(1, (x - lo) / (hi - lo)));
+      return t * t * (3 - 2 * t);
+    }
+
+    var px = fgData.data;
+    for (var i = 0; i < px.length; i += 4) {
+      var rawMatte = mPixels[i] / 255;
+      var a = edgeShift !== 0 ? Math.max(0, Math.min(1, rawMatte - edgeShift)) : rawMatte;
+      if (edgeMode === 'crisp') {
+        a = smoothstep(0.28, 0.72, a);
+      } else if (edgeMode === 'soft') {
+        a = smoothstep(0.01, 0.94, a);
+      }
+      px[i + 3] = Math.round(a * 255);
+    }
+    fgCtx.putImageData(fgData, 0, 0);
+
+    // 3. Drop Shadow
+    var shMode = options.shadowMode || 'none';
+    var shOp = Math.max(0, Math.min(1, (options.shadowOpacity !== undefined ? options.shadowOpacity : 25) / 100));
+    if (shMode !== 'none' && shOp > 0.01) {
+      var shBlur = Math.max(1, ((options.shadowBlur || 25) / 100) * Math.min(w, h) * 0.05);
+      var shiftFrac = (options.shadowShift || 0) / 100;
+      var offX = shMode === 'realistic' ? w * (0.036 + shiftFrac * 0.04) : w * 0.01 * (1 + shiftFrac);
+      var offY = shMode === 'realistic' ? h * 0.014 : h * 0.018 * (1 + shiftFrac);
+
+      ctx.save();
+      if (mode !== 'transparent') {
+        ctx.globalCompositeOperation = options.shadowBlendMode === 'soft_light' ? 'soft-light' : 'multiply';
+      }
+      ctx.shadowColor = 'rgba(10, 12, 16, ' + (shOp * 0.65).toFixed(3) + ')';
+      ctx.shadowBlur = shMode === 'flat' ? shBlur * 0.35 : shBlur;
+      ctx.shadowOffsetX = offX;
+      ctx.shadowOffsetY = offY;
+      ctx.drawImage(fgCanvas, 0, 0);
+      ctx.restore();
+    }
+
+    // 4. Ground Reflection
+    if (options.groundReflection) {
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      ctx.translate(0, h * 1.8);
+      ctx.scale(1, -0.8);
+      ctx.drawImage(fgCanvas, 0, 0);
+      ctx.restore();
+    }
+
+    // 5. Draw foreground
+    ctx.drawImage(fgCanvas, 0, 0);
+
+    var outDataUrl = mode === 'transparent'
+      ? outCanvas.toDataURL('image/png')
+      : outCanvas.toDataURL('image/jpeg', 0.95);
+
+    var baseName = (photo.name || (photo.file && photo.file.name) || 'photo').replace(/\.[^.]+$/, '');
+    var newFile = dataURLtoFile(outDataUrl, baseName + '_nen_' + mode + (mode === 'transparent' ? '.png' : '.jpg'));
+
+    photo.file = newFile;
+    photo.src = URL.createObjectURL(newFile);
+    photo._devstuDataUrl = outDataUrl;
+    photo._isAiVersion = true;
+
+    try {
+      if (typeof createImageBitmap === 'function') {
+        createImageBitmap(newFile, { resizeWidth: 160, resizeHeight: 120, resizeQuality: 'medium' }).then(function(bmp) {
+          photo.thumb = bmp;
+          if (window._devstuA) window._devstuA.emit('thumbs');
+        }).catch(function() {});
+      }
+    } catch (e) {}
+
+    if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
+      try { window._devstuStage.loadPhoto(photo); } catch (e) {}
+    }
+    if (window._devstuA) {
+      window._devstuA.emit('photos');
+      window._devstuA.emit('current');
+    }
+
+    return { ok: true, data_url: outDataUrl };
+  }
+
   window.CollabsDevstuAI = {
     EVOTO_HAIR_SPECS: EVOTO_HAIR_SPECS,
     dataURLtoFile: dataURLtoFile,
     getPhotoDataUrl: getPhotoDataUrl,
     ensurePhotoAiMask: ensurePhotoAiMask,
+    ensurePhotoAiMatte: ensurePhotoAiMatte,
+    applyCollabsBgComposite: applyCollabsBgComposite,
     runLiyingBackgroundReplacement: runLiyingBackgroundReplacement,
     runEvotoHairDye: runEvotoHairDye,
     restoreOriginalPhoto: restoreOriginalPhoto
