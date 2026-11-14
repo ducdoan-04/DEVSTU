@@ -4788,6 +4788,11 @@ function applyCollabsPreset(presetId, title) {
   try {
     const photo = window._devstuA?.current;
     if (!photo) return;
+    if (window._devstuA?.mode === 'stu_ultra' && window.StuUltra && typeof window.StuUltra.applyPreset === 'function') {
+      window.StuUltra.applyPreset(presetId);
+      recordCollabsHistory(photo, 'Áp dụng Cài sẵn Rust SIMD', title, 'Đã áp dụng');
+      return;
+    }
     if (photo.state) {
       if (presetId === 'clean_natural') {
         photo.state.exposure = (photo.state.exposure || 0) + 0.15;

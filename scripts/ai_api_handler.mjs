@@ -27,10 +27,71 @@ function findPython() {
   return 'python';
 }
 
+let rustWorkerProc = null;
+
+export async function isRustWorkerAlive() {
+  try {
+    const res = await fetch('http://127.0.0.1:3005/api/ping', { signal: AbortSignal.timeout(600) });
+    const j = await res.json();
+    return Boolean(j && j.ok);
+  } catch (e) {
+    return false;
+  }
+}
+
+export async function ensureRustWorkerRunning() {
+  if (await isRustWorkerAlive()) return true;
+
+  const rustExe = 'F:/Workspace/Code projects/2. Tool Media by Doan/Collabs-Retouch-Pro/src-tauri/target/debug/retouch-pro.exe';
+  if (!fs.existsSync(rustExe)) {
+    console.error('retouch-pro.exe not found at:', rustExe);
+    return false;
+  }
+
+  console.log('[DEVSTU] Spawning Collabs-Retouch-Pro Rust SIMD Worker on port 3005...');
+  rustWorkerProc = spawn(rustExe, ['--server', '3005'], {
+    windowsHide: true,
+    stdio: 'ignore',
+    detached: true
+  });
+  rustWorkerProc.unref();
+
+  for (let i = 0; i < 40; i++) {
+    await new Promise(r => setTimeout(r, 100));
+    if (await isRustWorkerAlive()) {
+      console.log('[DEVSTU] Rust SIMD Worker is ready on port 3005!');
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function handleAiRequest(pathname, req, res) {
   if (pathname === '/api/ping') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ ok: true, app: 'DEVSTU' }));
+    res.end(JSON.stringify({ ok: true, app: 'DEVSTU', rustWorker: await isRustWorkerAlive() }));
+    return true;
+  }
+
+  if (pathname === '/api/process_photo') {
+    await ensureRustWorkerRunning();
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const bodyBuf = Buffer.concat(chunks);
+
+    try {
+      const rustRes = await fetch('http://127.0.0.1:3005/api/process_photo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: bodyBuf
+      });
+      const data = await rustRes.json();
+      res.writeHead(rustRes.status, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(data));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: false, error: 'Rust SIMD Worker proxy error: ' + String(err) }));
+    }
     return true;
   }
 

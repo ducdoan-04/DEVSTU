@@ -4829,3 +4829,111 @@ body:has(.panel[data-mt="crop"]) .heal-card.crop-card,
 
 
 #app.app-stu-ultra .hdr .pill.accent { display: none !important; }
+
+/* STU Ultra Rust SIMD Viewport Overlays */
+#app.app-stu-ultra .viewport > canvas.vrot,
+#app.app-stu-ultra .viewport > .brush-ov,
+#app.app-stu-ultra .viewport > .rv-ov,
+#app.app-stu-ultra .viewport > .gpu-prep {
+  display: none !important;
+}
+
+#stu-ultra-viewport {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  z-index: 10;
+}
+
+#app.app-stu-ultra #stu-ultra-viewport {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.stu-ultra-canvas-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+#stu-ultra-after-canvas {
+  display: block;
+  max-width: calc(100% - 40px);
+  max-height: calc(100% - 40px);
+  object-fit: contain;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+#stu-ultra-before-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: calc(100% - 40px);
+  max-height: calc(100% - 40px);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.stu-ultra-split-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: rgba(255, 255, 255, 0.88);
+  cursor: ew-resize;
+  z-index: 12;
+  pointer-events: auto;
+}
+
+.stu-ultra-split-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(17, 18, 22, 0.9);
+  border: 1.5px solid #ffffff;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+}
+
+.stu-ultra-split-pill {
+  position: absolute;
+  top: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(12, 13, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.stu-ultra-split-pill.tag-before {
+  right: 8px;
+}
+
+.stu-ultra-split-pill.tag-after {
+  left: 8px;
+}

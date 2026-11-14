@@ -1,15 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
-// 1. Read source assets
+// 1. Read source assets from Collabs Retouch Pro
 const railHtml = fs.readFileSync('scripts/collabs_rail.html', 'utf8');
 const inspectorHtml = fs.readFileSync('scripts/collabs_inspector.html', 'utf8');
 const serializedRail = JSON.stringify(railHtml);
 const serializedInspector = JSON.stringify(inspectorHtml);
 
-// 2. Generate assets/stu_ultra_module.js
-const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & Rail Module
-// Ported from Collabs Retouch Pro with 5 Full Modules: Portrait, Color, Background, Clothing, Crop
+// 2. Generate assets/stu_ultra_module.js with native Collabs-Retouch-Pro Rust SIMD integration
+const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra with Collabs-Retouch-Pro Rust SIMD Engine
+// Complete 5-module Inspector + Split-View Viewport + 100% Rust Backend Algorithm Integration
 
 (function(window) {
   'use strict';
@@ -124,8 +124,19 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
 
     gradeShadowHue: 210, gradeShadowSat: 0,
     gradeHighHue: 38, gradeHighSat: 0,
-    sharpenAmount: 0, noiseReduction: 0,
-    filmGrain: 0, vignette: 0, lutPreset: 'none',
+    gradeMidHue: 120, gradeMidSat: 0,
+    gradeGlobalHue: 45, gradeGlobalSat: 0,
+    gradeShadowLum: 0, gradeMidLum: 0, gradeHighLum: 0, gradeGlobalLum: 0,
+    gradeBlending: 50, gradeBalance: 0,
+    treatment: 'color',
+    bwRed: 0, bwOrange: 0, bwYellow: 0, bwGreen: 0, bwAqua: 0, bwBlue: 0, bwPurple: 0, bwMagenta: 0,
+
+    aiDenoise: 0, nrDetail: 50, noiseReduction: 0, nrColor: 0,
+    sharpenAmount: 0, sharpenRadius: 1, sharpenDetail: 25, sharpenMasking: 0,
+    filmGrain: 0, grainSize: 25, grainRoughness: 50,
+    vignette: 0, vignetteMidpoint: 50, vignetteRoundness: 0, vignetteFeather: 50, vignetteHighlights: 0,
+    opticsDistortion: 0, opticsVignetting: 0, opticsVignettingMidpoint: 50, opticsCaRed: 0, opticsCaBlue: 0,
+    lutPreset: 'none',
 
     // MODULE 3: BACKGROUND & CLOTHING
     clothingTarget: 'all',
@@ -192,7 +203,54 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
     geoOffsetX: 0,
     geoOffsetY: 0,
     flipHorizontal: false,
-    flipVertical: false
+    flipVertical: false,
+    isHighresMatte: false
+  };
+
+  var RETOUCH_PRESETS = {
+    clean_natural: {
+      freckleAcne: 55, faceShine: 35, darkCircles: 45, dodgeBurnEven: 35, dodgeBurnSculpt: 22,
+      freqSepLow: 42, freqSepHigh: 84, skinRadiance: 22, eyeBrighten: 38, catchlightBoost: 28,
+      redVeins: 35, teethWhiten: 35, exposure: 4, contrast: 6, highlights: -8, shadows: 12, vibrance: 10,
+      lutPreset: 'clean_portrait'
+    },
+    high_fashion: {
+      freckleAcne: 85, faceMole: 60, faceShine: 65, darkCircles: 70, eyeBags: 55, nasolabialFolds: 45,
+      dodgeBurnEven: 68, dodgeBurnSculpt: 65, freqSepLow: 68, freqSepHigh: 84, unifyComplexion: 55,
+      skinRadiance: 35, jawlineSlim: 16, cheekboneLift: 18, eyeSize: 10, eyeBrighten: 60, catchlightBoost: 50,
+      teethWhiten: 55, makeupHighlight: 42, makeupContour: 38, makeupLipstick: 30, strayHair: 55,
+      hairShine: 48, contrast: 14, clarity: 14, sharpenAmount: 20, lutPreset: 'clean_portrait'
+    },
+    glamour_makeup: {
+      freckleAcne: 70, freqSepLow: 58, freqSepHigh: 82, dodgeBurnSculpt: 50, skinRadiance: 38, skinRosy: 16,
+      darkCircles: 60, eyeBrighten: 55, eyebrowThickness: 26, eyebrowLift: 14, lipPlump: 20, smileEnhance: 16,
+      makeupHighlight: 50, makeupContour: 46, makeupBlush: 58, makeupEyeshadow: 45, makeupLipstick: 65,
+      makeupLipTint: 'berry', hairVolume: 25, hairShine: 42
+    },
+    wedding_luminous: {
+      freckleAcne: 50, faceShine: 38, darkCircles: 48, freqSepLow: 48, freqSepHigh: 85, skinRadiance: 42,
+      skinWarmth: 16, eyeBrighten: 42, teethWhiten: 48, smileEnhance: 14, exposure: 8, highlights: -14,
+      shadows: 20, temperature: 12, vibrance: 14, lutPreset: 'warm_wedding'
+    },
+    corporate_exec: {
+      freckleAcne: 60, faceShine: 70, glassesGlare: 45, darkCircles: 65, eyeBags: 50, doubleChin: 30,
+      freqSepLow: 38, freqSepHigh: 88, dodgeBurnEven: 42, eyeBrighten: 45, redVeins: 50, teethWhiten: 45,
+      strayHair: 65, clothingDewrinkle: 75, clothingLintClean: 55, backdropClean: 60, bgBlurBokeh: 35,
+      contrast: 10, lutPreset: 'clean_portrait'
+    },
+    passport_id: {
+      freckleAcne: 48, faceShine: 60, darkCircles: 50, freqSepLow: 32, strayHair: 80, clothingDewrinkle: 65,
+      backdropClean: 85, bgReplaceMode: 'pure_white', exposure: 5, contrast: 6
+    },
+    cinematic_film: {
+      freckleAcne: 50, freqSepLow: 42, dodgeBurnSculpt: 50, eyeBrighten: 55, contrast: 20, highlights: -18,
+      shadows: 12, clarity: 20, gradeShadowHue: 205, gradeShadowSat: 35, gradeHighHue: 36, gradeHighSat: 30,
+      bgBlurBokeh: 50, vignette: 32, lutPreset: 'cinematic_teal'
+    },
+    bw_dramatic: {
+      freckleAcne: 60, freqSepLow: 45, dodgeBurnSculpt: 70, eyeBrighten: 65, contrast: 28, highlights: -14,
+      whites: 18, blacks: -18, clarity: 32, sharpenAmount: 22, filmGrain: 25, vignette: 38, lutPreset: 'bw_studio'
+    }
   };
 
   function createDefaultParams() {
@@ -206,129 +264,26 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
     return Number.isInteger(num) ? String(num) : num.toFixed(1);
   }
 
-  // 1-to-1 Mapping from STU Ultra Sliders to DEVSTU's Native State Engine
-  var SLIDER_MAP = {
-    // Tone & Light
-    exposure: function(st, val) { if (st.tone) st.tone.exposure = val / 50; },
-    contrast: function(st, val) { if (st.tone) st.tone.contrast = val; },
-    highlights: function(st, val) { if (st.tone) st.tone.highlights = val; },
-    shadows: function(st, val) { if (st.tone) st.tone.shadows = val; },
-    whites: function(st, val) { if (st.tone) st.tone.whites = val; },
-    blacks: function(st, val) { if (st.tone) st.tone.blacks = val; },
-    temperature: function(st, val) { if (st.wb) st.wb.temp = val; },
-    tint: function(st, val) { if (st.wb) st.wb.tint = val; },
-    vibrance: function(st, val) { if (st.presence) st.presence.vibrance = val; },
-    saturation: function(st, val) { if (st.presence) st.presence.saturation = val; },
-    clarity: function(st, val) { if (st.presence) st.presence.clarity = val; },
-    texture: function(st, val) { if (st.presence) st.presence.texture = val; },
-    dehaze: function(st, val) { if (st.land) st.land.haze = -val; },
-    sharpenAmount: function(st, val) { if (st.detail) st.detail.sharpen = val; },
-    noiseReduction: function(st, val) { if (st.detail) st.detail.denoise = val; },
-    filmGrain: function(st, val) { if (st.effects) st.effects.grain = val; },
-    vignette: function(st, val) { if (st.lens) st.lens.vignette = val; },
-
-    // HSL 8 Channels (Full Color Wheel)
-    hslRedHue: function(st, val) { if (st.hsl) st.hsl.h0 = val; },
-    hslRedSat: function(st, val) { if (st.hsl) st.hsl.s0 = val; },
-    hslRedLum: function(st, val) { if (st.hsl) st.hsl.l0 = val; },
-    hslOrangeHue: function(st, val) { if (st.hsl) st.hsl.h1 = val; },
-    hslOrangeSat: function(st, val) { if (st.hsl) st.hsl.s1 = val; },
-    hslOrangeLum: function(st, val) { if (st.hsl) st.hsl.l1 = val; },
-    hslYellowHue: function(st, val) { if (st.hsl) st.hsl.h2 = val; },
-    hslYellowSat: function(st, val) { if (st.hsl) st.hsl.s2 = val; },
-    hslYellowLum: function(st, val) { if (st.hsl) st.hsl.l2 = val; },
-    hslGreenHue: function(st, val) { if (st.hsl) st.hsl.h3 = val; },
-    hslGreenSat: function(st, val) { if (st.hsl) st.hsl.s3 = val; },
-    hslGreenLum: function(st, val) { if (st.hsl) st.hsl.l3 = val; },
-    hslAquaHue: function(st, val) { if (st.hsl) st.hsl.h4 = val; },
-    hslAquaSat: function(st, val) { if (st.hsl) st.hsl.s4 = val; },
-    hslAquaLum: function(st, val) { if (st.hsl) st.hsl.l4 = val; },
-    hslBlueHue: function(st, val) { if (st.hsl) st.hsl.h5 = val; },
-    hslBlueSat: function(st, val) { if (st.hsl) st.hsl.s5 = val; },
-    hslBlueLum: function(st, val) { if (st.hsl) st.hsl.l5 = val; },
-    hslPurpleHue: function(st, val) { if (st.hsl) st.hsl.h6 = val; },
-    hslPurpleSat: function(st, val) { if (st.hsl) st.hsl.s6 = val; },
-    hslPurpleLum: function(st, val) { if (st.hsl) st.hsl.l6 = val; },
-    hslMagentaHue: function(st, val) { if (st.hsl) st.hsl.h7 = val; },
-    hslMagentaSat: function(st, val) { if (st.hsl) st.hsl.s7 = val; },
-    hslMagentaLum: function(st, val) { if (st.hsl) st.hsl.l7 = val; },
-
-    // Portrait - Khử khuyết điểm (Blemish Removal & Clean Face)
-    freckleAcne: function(st, val) { if (st.skin) st.skin.ai = val; },
-    faceMole: function(st, val) { if (st.skin) st.skin.marks = val; },
-    faceShine: function(st, val) { if (st.skin) st.skin.oil = val; },
-    darkCircles: function(st, val) { if (st.skin) st.skin.circles = val; },
-    eyeBags: function(st, val) { if (st.skin) st.skin.bags = val; },
-    foreheadWrinkles: function(st, val) { if (st.skin) st.skin.wFore = val; },
-    nasolabialFolds: function(st, val) { if (st.skin) st.skin.wNose = val; },
-    neckWrinkles: function(st, val) { if (st.skin) st.skin.wNeck = val; },
-    glassesGlare: function(st, val) { if (st.skin) st.skin.glare = val; },
-    doubleChin: function(st, val) { if (st.shape) st.shape.chin = val; if (st.skin) st.skin.chin = val; },
-    bodyBlemish: function(st, val) { if (st.skin) st.skin.bodyAi = val; },
-
-    // Portrait - Làm mịn da & Tông da (Skin Smoothing & Complexion)
-    facialSkinSmooth: function(st, val) { if (st.skin) st.skin.smooth = val; },
-    bodySkinSmooth: function(st, val) { if (st.skin) st.skin.smoothBody = val; },
-    freqSepHigh: function(st, val) { if (st.skin) st.skin.keep = val; },
-    unifyComplexion: function(st, val) { if (st.skin) st.skin.even = val; },
-    dodgeBurnEven: function(st, val) { if (st.skin) st.skin.db = val; },
-    dodgeBurnSculpt: function(st, val) { if (st.skin) st.skin.db = val; },
-    skinRadiance: function(st, val) { if (st.skin) st.skin.bright = val; },
-    skinRosy: function(st, val) { if (st.skin) st.skin.rosy = val; },
-    skinWarmth: function(st, val) { if (st.skin) st.skin.tan = val; },
-
-    // Portrait - Định hình khuôn mặt 3D Liquify
-    faceWidth: function(st, val) { if (st.shape) st.shape.faceSize = -val; },
-    jawlineSlim: function(st, val) { if (st.shape) st.shape.jaw = val; },
-    cheekboneLift: function(st, val) { if (st.shape) st.shape.cheekbone = -val; },
-    chinLength: function(st, val) { if (st.shape) st.shape.chinLen = val; },
-    foreheadHeight: function(st, val) { if (st.shape) st.shape.forehead = val; },
-    noseWidth: function(st, val) { if (st.shape) st.shape.nose = -val; },
-    noseTipLift: function(st, val) { if (st.shape) st.shape.noseTip = val; },
-    mouthSize: function(st, val) { if (st.shape) st.shape.mouth = val; },
-    lipPlump: function(st, val) { if (st.shape) { st.shape.lipTop = val; st.shape.lipBot = val; } },
-    smileEnhance: function(st, val) { if (st.shape) st.shape.smile = val; },
-
-    // Portrait - Mắt & Lông mày
-    eyeSize: function(st, val) { if (st.shape) st.shape.eyes = val; },
-    eyeBrighten: function(st, val) { if (st.skin) st.skin.eyes = val; },
-    redVeins: function(st, val) { if (st.skin) st.skin.vein = val; },
-    catchlightBoost: function(st, val) { if (st.skin) st.skin.gloss = val; },
-    eyebrowThickness: function(st, val) { if (st.skin) st.skin.brow = val; },
-    eyebrowLift: function(st, val) { if (st.shape) st.shape.brow = val; },
-
-    // Portrait - Răng
-    teethWhiten: function(st, val) { if (st.skin) st.skin.teeth = val; },
-    teethDesaturate: function(st, val) { if (st.skin) st.skin.teethEven = val; },
-    teethBrighten: function(st, val) { if (st.skin) st.skin.teethEven = val; },
-
-    // Portrait - Trang điểm
-    makeupLipstick: function(st, val) { if (st.skin) st.skin.lip = val; },
-    makeupBlush: function(st, val) { if (st.skin) st.skin.blush = val; },
-    makeupContour: function(st, val) { if (st.skin) st.skin.contour = val; },
-    makeupHighlight: function(st, val) { if (st.skin) st.skin.bright = Math.max(st.skin.bright, val * 0.5); },
-
-    // Portrait - Tóc Evoto HairBeauty
-    strayHair: function(st, val) { if (st.skin) { st.skin.flyIn = val; st.skin.flyOut = val; } },
-    strayHairInner: function(st, val) { if (st.skin) st.skin.flyIn = val; },
-    strayHairOuter: function(st, val) { if (st.skin) st.skin.flyOut = val; },
-    hairSmooth: function(st, val) { if (st.skin) st.skin.frizz = 100 - val; },
-    hairFrizzy: function(st, val) { if (st.skin) st.skin.frizz = val; },
-    hairShine: function(st, val) { if (st.skin) st.skin.shine = val; },
-    whiteHairBlacken: function(st, val) { if (st.skin) st.skin.hairGray = val; },
-    hairDyeStrength: function(st, val) { if (st.skin) st.skin.dye = val; },
-
-    // Portrait - Định hình cơ thể
-    waistSlim: function(st, val) { if (st.shape) st.shape.waist = val; },
-    shoulderSculpt: function(st, val) { if (st.shape) st.shape.arms = val; },
-    neckSlim: function(st, val) { if (st.skin) st.skin.wNeck = Math.max(st.skin.wNeck, val); },
-
-    // Clothing - Trang phục
-    clothingDewrinkle: function(st, val) { if (st.skin) st.skin.cloth = val; },
-    clothingSmallWrinkles: function(st, val) { if (st.skin) st.skin.cloth = val; },
-    clothingLargeWrinkles: function(st, val) { if (st.skin) st.skin.cloth = val; },
-    clothingEdgeSmooth: function(st, val) { if (st.skin) st.skin.clothEdge = val; }
-  };
+  function getPhotoOriginalDataUrl(photo) {
+    return new Promise(function(resolve) {
+      if (!photo) return resolve(null);
+      if (photo._cachedOriginalDataUrl) {
+        return resolve(photo._cachedOriginalDataUrl);
+      }
+      var blob = photo.file || (photo.src && photo.src.blob);
+      if (blob) {
+        var reader = new FileReader();
+        reader.onload = function() {
+          photo._cachedOriginalDataUrl = reader.result;
+          resolve(reader.result);
+        };
+        reader.onerror = function() { resolve(null); };
+        reader.readAsDataURL(blob);
+      } else {
+        resolve(null);
+      }
+    });
+  }
 
   var RAIL_HTML = ` + serializedRail + `;
   var INSPECTOR_HTML = ` + serializedInspector + `;
@@ -338,9 +293,17 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
     inspector: null,
     rail: null,
     headerRight: null,
+    viewport: null,
+    afterCanvas: null,
+    beforeCanvas: null,
+    splitLine: null,
     activeModule: 'mod-portrait',
     histOpen: true,
     realtimeColor: true,
+    splitRatio: 0.5,
+    isDraggingSplit: false,
+    isProcessing: false,
+    pendingProcess: false,
 
     init: function() {
       if (document.getElementById('stu-ultra-container')) return;
@@ -351,7 +314,7 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
         return;
       }
 
-      // Create Container
+      // 1. Create Inspector + Rail Container
       var cont = document.createElement('div');
       cont.id = 'stu-ultra-container';
       cont.className = 'stu-ultra-container';
@@ -361,18 +324,21 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
       StuUltra.inspector = cont.querySelector('.retouch-right-inspector');
       StuUltra.rail = cont.querySelector('.retouch-right-rail');
 
-      // Create Header Right Controls
+      // 2. Inject STU Ultra Viewport into .viewport
+      StuUltra.initViewport();
+
+      // 3. Create Header Right Controls
       var hdr = document.querySelector('.hdr');
       if (hdr && !document.getElementById('stu-ultra-header-right')) {
         var hrDiv = document.createElement('div');
         hrDiv.id = 'stu-ultra-header-right';
         hrDiv.className = 'stu-ultra-header-right';
-        hrDiv.innerHTML = '<div class="stu-ultra-status-pill" title="Bộ xử lý Rust SIMD đa luồng & AI MediaPipe 478 điểm">' +
+        hrDiv.innerHTML = '<div class="stu-ultra-status-pill" title="Bộ xử lý Collabs-Retouch-Pro Rust SIMD & AI 478 điểm">' +
           '<span class="stu-ultra-status-dot"></span>' +
-          '<span id="stu-ultra-status-label">AI 478 điểm ✓ • Gốc</span>' +
+          '<span id="stu-ultra-status-label">AI 478 điểm ✓ • Rust SIMD Sẵn sàng</span>' +
           '</div>' +
           '<button id="stu-ultra-btn-reset" type="button" class="stu-ultra-btn-reset" title="Khôi phục toàn bộ ảnh về ban đầu">Đặt lại</button>' +
-          '<button id="stu-ultra-btn-export" type="button" class="stu-ultra-btn-export" title="Xuất ảnh độ phân giải gốc">Xuất</button>';
+          '<button id="stu-ultra-btn-export" type="button" class="stu-ultra-btn-export" title="Xuất ảnh chất lượng cao 4K qua Rust SIMD">Xuất</button>';
         
         var lastPill = hdr.querySelector('.pill.accent') || hdr.lastChild;
         if (lastPill && lastPill.parentNode === hdr) {
@@ -400,30 +366,212 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
         });
       }
 
-      // Check initial mode
       StuUltra.onModeChange();
     },
 
-    ensureFacesDetected: function(photo) {
+    initViewport: function() {
+      var vp = document.querySelector('.viewport');
+      if (!vp || document.getElementById('stu-ultra-viewport')) return;
+
+      var vDiv = document.createElement('div');
+      vDiv.id = 'stu-ultra-viewport';
+      vDiv.className = 'stu-ultra-viewport';
+      vDiv.innerHTML = '<div id="stu-ultra-canvas-wrap" class="stu-ultra-canvas-wrap">' +
+        '<canvas id="stu-ultra-after-canvas"></canvas>' +
+        '<canvas id="stu-ultra-before-canvas"></canvas>' +
+        '<div id="stu-ultra-split-line" class="stu-ultra-split-line">' +
+        '<div class="stu-ultra-split-pill tag-before">Trước</div>' +
+        '<div class="stu-ultra-split-knob">' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>' +
+        '</div>' +
+        '<div class="stu-ultra-split-pill tag-after">Sau</div>' +
+        '</div>' +
+        '</div>';
+
+      vp.appendChild(vDiv);
+      StuUltra.viewport = vDiv;
+      StuUltra.afterCanvas = vDiv.querySelector('#stu-ultra-after-canvas');
+      StuUltra.beforeCanvas = vDiv.querySelector('#stu-ultra-before-canvas');
+      StuUltra.splitLine = vDiv.querySelector('#stu-ultra-split-line');
+
+      // Bind split-line drag
+      var onSplitMove = function(clientX) {
+        if (!StuUltra.isDraggingSplit) return;
+        var wrap = document.getElementById('stu-ultra-canvas-wrap');
+        if (!wrap) return;
+        var rect = wrap.getBoundingClientRect();
+        if (rect.width <= 0) return;
+        var ratio = (clientX - rect.left) / rect.width;
+        StuUltra.splitRatio = Math.max(0.01, Math.min(0.99, ratio));
+        StuUltra.updateSplitRender();
+      };
+
+      StuUltra.splitLine.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        StuUltra.isDraggingSplit = true;
+      });
+
+      window.addEventListener('mousemove', function(e) {
+        if (StuUltra.isDraggingSplit) {
+          onSplitMove(e.clientX);
+        }
+      });
+
+      window.addEventListener('mouseup', function() {
+        StuUltra.isDraggingSplit = false;
+      });
+
+      StuUltra.splitLine.addEventListener('touchstart', function(e) {
+        if (e.touches && e.touches[0]) {
+          StuUltra.isDraggingSplit = true;
+        }
+      });
+
+      window.addEventListener('touchmove', function(e) {
+        if (StuUltra.isDraggingSplit && e.touches && e.touches[0]) {
+          onSplitMove(e.touches[0].clientX);
+        }
+      });
+
+      window.addEventListener('touchend', function() {
+        StuUltra.isDraggingSplit = false;
+      });
+
+      StuUltra.splitLine.addEventListener('dblclick', function() {
+        StuUltra.splitRatio = 0.5;
+        StuUltra.updateSplitRender();
+      });
+    },
+
+    updateSplitRender: function() {
+      if (!StuUltra.splitLine || !StuUltra.beforeCanvas || !StuUltra.loadedBeforeImg) return;
+      var ratio = StuUltra.splitRatio;
+      StuUltra.splitLine.style.left = (ratio * 100) + '%';
+
+      var bw = StuUltra.beforeCanvas.width;
+      var bh = StuUltra.beforeCanvas.height;
+      if (bw <= 0 || bh <= 0) return;
+
+      var ctx = StuUltra.beforeCanvas.getContext('2d');
+      ctx.clearRect(0, 0, bw, bh);
+      var splitX = Math.round(bw * ratio);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, splitX, bh);
+      ctx.clip();
+      ctx.drawImage(StuUltra.loadedBeforeImg, 0, 0, bw, bh);
+      ctx.restore();
+    },
+
+    renderViewport: function(photo) {
+      if (!StuUltra.afterCanvas || !StuUltra.beforeCanvas) return;
+      var originalUrl = photo._cachedOriginalDataUrl;
+      var processedUrl = photo.processedDataUrl || originalUrl;
+      if (!originalUrl) return;
+
+      var beforeImg = new Image();
+      var afterImg = new Image();
+      var loadedCount = 0;
+      var onBothLoaded = function() {
+        var w = afterImg.naturalWidth || beforeImg.naturalWidth;
+        var h = afterImg.naturalHeight || beforeImg.naturalHeight;
+        if (!w || !h) return;
+
+        StuUltra.afterCanvas.width = w;
+        StuUltra.afterCanvas.height = h;
+        StuUltra.beforeCanvas.width = w;
+        StuUltra.beforeCanvas.height = h;
+
+        var afterCtx = StuUltra.afterCanvas.getContext('2d');
+        afterCtx.clearRect(0, 0, w, h);
+        afterCtx.drawImage(afterImg, 0, 0, w, h);
+
+        StuUltra.loadedBeforeImg = beforeImg;
+        StuUltra.updateSplitRender();
+      };
+
+      beforeImg.onload = function() {
+        loadedCount++;
+        if (loadedCount === 2) onBothLoaded();
+      };
+      afterImg.onload = function() {
+        loadedCount++;
+        if (loadedCount === 2) onBothLoaded();
+      };
+
+      beforeImg.src = originalUrl;
+      afterImg.src = processedUrl;
+    },
+
+    triggerRustProcess: function(photo, highQuality) {
       if (!photo) return;
-      if (!photo.faces && window._devstuLt) {
+      if (!photo._stuUltraParams) photo._stuUltraParams = createDefaultParams();
+
+      if (StuUltra.isProcessing) {
+        StuUltra.pendingProcess = true;
+        return;
+      }
+
+      StuUltra.isProcessing = true;
+      getPhotoOriginalDataUrl(photo).then(function(originalDataUrl) {
+        if (!originalDataUrl) {
+          StuUltra.isProcessing = false;
+          return;
+        }
+
         var statusLabel = document.getElementById('stu-ultra-status-label');
-        if (statusLabel) statusLabel.textContent = 'Đang phân tích AI 478 điểm...';
-        window._devstuLt(photo, true).then(function(faces) {
-          if (faces && faces.length) {
-            if (statusLabel) statusLabel.textContent = 'AI 478 điểm ✓ • ' + faces.length + ' mặt';
-            if (window._devstuStage && window._devstuStage.requestRender) {
-              window._devstuStage.requestRender();
+        if (statusLabel) statusLabel.textContent = 'Đang xử lý Rust SIMD...';
+
+        fetch('/api/process_photo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: originalDataUrl,
+            params: photo._stuUltraParams,
+            highQuality: Boolean(highQuality)
+          })
+        }).then(function(res) {
+          return res.json();
+        }).then(function(data) {
+          StuUltra.isProcessing = false;
+          if (data && data.ok && data.dataUrl) {
+            photo.processedDataUrl = data.dataUrl;
+            if (statusLabel) {
+              statusLabel.textContent = 'AI 478 điểm ✓ • Rust SIMD • ' + data.elapsedMs + 'ms';
             }
-          } else {
-            if (statusLabel) statusLabel.textContent = 'AI 478 điểm ✓ • Gốc';
+            StuUltra.renderViewport(photo);
+            StuUltra.renderHistogramFromDataUrl(data.dataUrl);
           }
-        }).catch(function() {
-          if (statusLabel) statusLabel.textContent = 'AI 478 điểm ✓ • Gốc';
+          if (StuUltra.pendingProcess) {
+            StuUltra.pendingProcess = false;
+            StuUltra.triggerRustProcess(photo, false);
+          }
+        }).catch(function(err) {
+          StuUltra.isProcessing = false;
+          console.error('[STU Ultra] Rust SIMD error:', err);
+          if (StuUltra.pendingProcess) {
+            StuUltra.pendingProcess = false;
+            StuUltra.triggerRustProcess(photo, false);
+          }
         });
-      } else if (photo.faces && photo.faces.length) {
-        var statusLabel = document.getElementById('stu-ultra-status-label');
-        if (statusLabel) statusLabel.textContent = 'AI 478 điểm ✓ • ' + photo.faces.length + ' mặt';
+      });
+    },
+
+    applyPreset: function(presetKey) {
+      var presetValues = RETOUCH_PRESETS[presetKey];
+      var A = window._devstuA;
+      var photo = A && A.current;
+      if (!photo || !presetValues) return;
+      if (!photo._stuUltraParams) photo._stuUltraParams = createDefaultParams();
+      var fresh = createDefaultParams();
+      fresh.face = photo._stuUltraParams.face;
+      fresh.blemishSpots = photo._stuUltraParams.blemishSpots;
+      photo._stuUltraParams = Object.assign({}, fresh, presetValues);
+      StuUltra.syncSlidersFromParams(photo._stuUltraParams);
+      StuUltra.triggerRustProcess(photo, false);
+      if (typeof window.tt === 'function') {
+        window.tt('Đã áp dụng cài sẵn ' + presetKey + ' qua Rust SIMD ✓', 3000);
       }
     },
 
@@ -438,12 +586,16 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
       if (ultraBtn) {
         ultraBtn.setAttribute('aria-pressed', String(isUltra));
       }
+
       if (isUltra) {
+        StuUltra.initViewport();
         StuUltra.syncCurrentPhoto();
-        StuUltra.renderHistogram();
         StuUltra.renderToneCurve();
-        if (A && A.current) {
-          StuUltra.ensureFacesDetected(A.current);
+        var photo = A && A.current;
+        if (photo) {
+          getPhotoOriginalDataUrl(photo).then(function() {
+            StuUltra.triggerRustProcess(photo, false);
+          });
         }
       }
     },
@@ -465,11 +617,6 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
           StuUltra.activeModule = targetMod;
           if (rightHeading && btn.dataset.title) {
             rightHeading.textContent = btn.dataset.title;
-          }
-
-          var A = window._devstuA;
-          if (targetMod === 'mod-portrait' && A && A.current) {
-            StuUltra.ensureFacesDetected(A.current);
           }
         });
       });
@@ -550,11 +697,13 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
             var aw = parseFloat(opt.dataset.aw || 0);
             var ah = parseFloat(opt.dataset.ah || 0);
             var A = window._devstuA;
-            if (A && A.current) {
-              if (!A.current._stuUltraParams) A.current._stuUltraParams = createDefaultParams();
-              A.current._stuUltraParams.cropPreset = opt.dataset.preset;
-              A.current._stuUltraParams.cropAspectW = aw;
-              A.current._stuUltraParams.cropAspectH = ah;
+            var photo = A && A.current;
+            if (photo) {
+              if (!photo._stuUltraParams) photo._stuUltraParams = createDefaultParams();
+              photo._stuUltraParams.cropPreset = opt.dataset.preset;
+              photo._stuUltraParams.cropAspectW = aw;
+              photo._stuUltraParams.cropAspectH = ah;
+              StuUltra.triggerRustProcess(photo, false);
             }
           });
         });
@@ -586,11 +735,8 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
             'pastel_mix': '#e5dcd6',
             'transparent': 'transparent'
           };
-          var chosenColor = colorMap[bgmode] || '#ffffff';
-
-          if (window.CollabsDevstuAI && typeof window.CollabsDevstuAI.applyCollabsBgComposite === 'function') {
-            window.CollabsDevstuAI.applyCollabsBgComposite(photo, bgmode, chosenColor);
-          }
+          photo._stuUltraParams.bgCustomColor = colorMap[bgmode] || '#ffffff';
+          StuUltra.triggerRustProcess(photo, false);
         });
       });
 
@@ -603,14 +749,12 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
           if (!photo) return;
           if (!photo._stuUltraParams) photo._stuUltraParams = createDefaultParams();
           photo._stuUltraParams.hairDyeColor = colorKey;
-
-          if (window.CollabsDevstuAI && typeof window.CollabsDevstuAI.runEvotoHairDye === 'function') {
-            window.CollabsDevstuAI.runEvotoHairDye(photo, colorKey);
-          }
+          photo._stuUltraParams.hairDyeStrength = 65;
+          StuUltra.triggerRustProcess(photo, false);
         });
       });
 
-      // 9. All 163 Sliders with Complete Live Engine Sync
+      // 9. All 163 Sliders Hooked to Collabs-Retouch-Pro Rust Engine
       cont.querySelectorAll('.retouch-slider').forEach(function(slider) {
         var key = slider.id;
 
@@ -630,50 +774,17 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
             badge.classList.toggle('modified', isChanged);
           }
 
-          // Check if portrait slider requiring face detection
-          var isPortraitSlider = (
-            key === 'facialSkinSmooth' || key === 'freckleAcne' || key === 'faceMole' ||
-            key === 'faceShine' || key === 'darkCircles' || key === 'eyeBags' ||
-            key === 'foreheadWrinkles' || key === 'nasolabialFolds' || key === 'neckWrinkles' ||
-            key === 'faceWidth' || key === 'jawlineSlim' || key === 'cheekboneLift' ||
-            key === 'chinLength' || key === 'foreheadHeight' || key === 'noseWidth' ||
-            key === 'noseTipLift' || key === 'mouthSize' || key === 'lipPlump' ||
-            key === 'smileEnhance' || key === 'eyeSize' || key === 'eyeBrighten' ||
-            key === 'teethWhiten' || key === 'teethDesaturate' || key === 'makeupLipstick' ||
-            key === 'makeupBlush' || key === 'strayHair' || key === 'hairSmooth'
-          );
-
-          if (isPortraitSlider && !photo.faces && window._devstuLt) {
-            window._devstuLt(photo, true).then(function(faces) {
-              if (faces && faces.length) {
-                var lbl = document.getElementById('stu-ultra-status-label');
-                if (lbl) lbl.textContent = 'AI 478 điểm ✓ • ' + faces.length + ' mặt';
-                if (window._devstuStage && window._devstuStage.requestRender) {
-                  window._devstuStage.requestRender();
-                }
-              }
-            });
-          }
-
-          // Sync with DEVSTU Engine using SLIDER_MAP
-          if (SLIDER_MAP[key] && photo.state) {
-            SLIDER_MAP[key](photo.state, val);
-
-            if (window._devstuStage && typeof window._devstuStage.requestRender === 'function') {
-              window._devstuStage.requestRender();
-            }
-            if (A && typeof A.emit === 'function') {
-              A.emit('state');
-            }
+          if (StuUltra.realtimeColor) {
+            StuUltra.triggerRustProcess(photo, false);
           }
         });
 
-        // Mouse release (change) -> commit to DEVSTU undo history
+        // Mouse release (change) -> always process latest state
         slider.addEventListener('change', function() {
           var A = window._devstuA;
           var photo = A && A.current;
-          if (photo && photo.state && typeof A.setState === 'function') {
-            A.setState(photo.state, true);
+          if (photo) {
+            StuUltra.triggerRustProcess(photo, false);
           }
         });
 
@@ -686,7 +797,22 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
         });
       });
 
-      // 10. Footer Actions
+      // 10. Left & Inner Preset Card Click Handlers
+      document.querySelectorAll('.retouch-preset-item[data-preset]').forEach(function(card) {
+        card.addEventListener('click', function(e) {
+          var A = window._devstuA;
+          if (A && A.mode === 'stu_ultra') {
+            e.preventDefault();
+            e.stopPropagation();
+            document.querySelectorAll('.retouch-preset-item').forEach(function(c) { c.classList.remove('active'); });
+            card.classList.add('active');
+            var presetKey = card.dataset.preset;
+            StuUltra.applyPreset(presetKey);
+          }
+        }, true);
+      });
+
+      // 11. Footer Actions
       var btnResetFooter = cont.querySelector('#btn-reset-all-footer');
       var btnResetHdr = document.getElementById('stu-ultra-btn-reset');
       var handleResetAll = function() {
@@ -694,10 +820,11 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
         var photo = A && A.current;
         if (!photo) return;
         photo._stuUltraParams = createDefaultParams();
-        if (typeof window.SI === 'function') {
-          window.SI([photo]);
-        }
+        photo.processedDataUrl = null;
         StuUltra.syncSlidersFromParams(photo._stuUltraParams);
+        StuUltra.renderViewport(photo);
+        var lbl = document.getElementById('stu-ultra-status-label');
+        if (lbl) lbl.textContent = 'AI 478 điểm ✓ • Đã đặt lại ảnh gốc';
         if (typeof window.tt === 'function') {
           window.tt('Đã khôi phục toàn bộ thông số ảnh về ban đầu ✓', 3500);
         }
@@ -716,14 +843,6 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
           A.photos.forEach(function(item) {
             if (item !== photo) {
               item._stuUltraParams = Object.assign({}, p);
-              if (photo.state) {
-                item.state.tone = Object.assign({}, photo.state.tone);
-                item.state.wb = Object.assign({}, photo.state.wb);
-                item.state.presence = Object.assign({}, photo.state.presence);
-                item.state.hsl = Object.assign({}, photo.state.hsl);
-                item.state.skin = Object.assign({}, photo.state.skin);
-                item.state.shape = Object.assign({}, photo.state.shape);
-              }
               count++;
             }
           });
@@ -745,9 +864,42 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
       var btnExportHdr = document.getElementById('stu-ultra-btn-export');
       if (btnExportHdr) {
         btnExportHdr.addEventListener('click', function() {
-          if (typeof window.it === 'function') {
-            window.it('open-dialog', 'export');
-          }
+          var A = window._devstuA;
+          var photo = A && A.current;
+          if (!photo) return;
+          var statusLabel = document.getElementById('stu-ultra-status-label');
+          if (statusLabel) statusLabel.textContent = 'Đang xuất ảnh 4K qua Rust SIMD...';
+
+          getPhotoOriginalDataUrl(photo).then(function(originalDataUrl) {
+            if (!originalDataUrl) return;
+            fetch('/api/process_photo', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageBase64: originalDataUrl,
+                params: photo._stuUltraParams || createDefaultParams(),
+                highQuality: true
+              })
+            }).then(function(res) {
+              return res.json();
+            }).then(function(data) {
+              if (data && data.ok && data.dataUrl) {
+                var a = document.createElement('a');
+                a.href = data.dataUrl;
+                var baseName = (photo.name || 'retouch').replace(/\\.[^.]+$/, '');
+                a.download = baseName + '_STU_Ultra.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                if (statusLabel) {
+                  statusLabel.textContent = 'Xuất hoàn tất 4K ✓ (' + data.elapsedMs + 'ms)';
+                }
+                if (typeof window.tt === 'function') {
+                  window.tt('Đã xuất ảnh chất lượng cao 4K qua Rust SIMD ✓', 4000);
+                }
+              }
+            });
+          });
         });
       }
     },
@@ -769,87 +921,13 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
         photo._stuUltraParams = createDefaultParams();
       }
 
-      // Reverse sync from photo.state to _stuUltraParams if modified in DEVSTU
-      if (photo.state) {
-        var st = photo.state;
-        var p = photo._stuUltraParams;
-        if (st.tone) {
-          if (st.tone.exposure !== undefined) p.exposure = st.tone.exposure * 50;
-          if (st.tone.contrast !== undefined) p.contrast = st.tone.contrast;
-          if (st.tone.highlights !== undefined) p.highlights = st.tone.highlights;
-          if (st.tone.shadows !== undefined) p.shadows = st.tone.shadows;
-          if (st.tone.whites !== undefined) p.whites = st.tone.whites;
-          if (st.tone.blacks !== undefined) p.blacks = st.tone.blacks;
-        }
-        if (st.wb) {
-          if (st.wb.temp !== undefined) p.temperature = st.wb.temp;
-          if (st.wb.tint !== undefined) p.tint = st.wb.tint;
-        }
-        if (st.presence) {
-          if (st.presence.vibrance !== undefined) p.vibrance = st.presence.vibrance;
-          if (st.presence.saturation !== undefined) p.saturation = st.presence.saturation;
-          if (st.presence.clarity !== undefined) p.clarity = st.presence.clarity;
-          if (st.presence.texture !== undefined) p.texture = st.presence.texture;
-        }
-        if (st.hsl) {
-          if (st.hsl.h0 !== undefined) p.hslRedHue = st.hsl.h0;
-          if (st.hsl.s0 !== undefined) p.hslRedSat = st.hsl.s0;
-          if (st.hsl.l0 !== undefined) p.hslRedLum = st.hsl.l0;
-          if (st.hsl.h1 !== undefined) p.hslOrangeHue = st.hsl.h1;
-          if (st.hsl.s1 !== undefined) p.hslOrangeSat = st.hsl.s1;
-          if (st.hsl.l1 !== undefined) p.hslOrangeLum = st.hsl.l1;
-          if (st.hsl.h2 !== undefined) p.hslYellowHue = st.hsl.h2;
-          if (st.hsl.s2 !== undefined) p.hslYellowSat = st.hsl.s2;
-          if (st.hsl.l2 !== undefined) p.hslYellowLum = st.hsl.l2;
-          if (st.hsl.h3 !== undefined) p.hslGreenHue = st.hsl.h3;
-          if (st.hsl.s3 !== undefined) p.hslGreenSat = st.hsl.s3;
-          if (st.hsl.l3 !== undefined) p.hslGreenLum = st.hsl.l3;
-          if (st.hsl.h4 !== undefined) p.hslAquaHue = st.hsl.h4;
-          if (st.hsl.s4 !== undefined) p.hslAquaSat = st.hsl.s4;
-          if (st.hsl.l4 !== undefined) p.hslAquaLum = st.hsl.l4;
-          if (st.hsl.h5 !== undefined) p.hslBlueHue = st.hsl.h5;
-          if (st.hsl.s5 !== undefined) p.hslBlueSat = st.hsl.s5;
-          if (st.hsl.l5 !== undefined) p.hslBlueLum = st.hsl.l5;
-          if (st.hsl.h6 !== undefined) p.hslPurpleHue = st.hsl.h6;
-          if (st.hsl.s6 !== undefined) p.hslPurpleSat = st.hsl.s6;
-          if (st.hsl.l6 !== undefined) p.hslPurpleLum = st.hsl.l6;
-          if (st.hsl.h7 !== undefined) p.hslMagentaHue = st.hsl.h7;
-          if (st.hsl.s7 !== undefined) p.hslMagentaSat = st.hsl.s7;
-          if (st.hsl.l7 !== undefined) p.hslMagentaLum = st.hsl.l7;
-        }
-        if (st.skin) {
-          if (st.skin.smooth !== undefined) p.facialSkinSmooth = st.skin.smooth;
-          if (st.skin.smoothBody !== undefined) p.bodySkinSmooth = st.skin.smoothBody;
-          if (st.skin.ai !== undefined) p.freckleAcne = st.skin.ai;
-          if (st.skin.marks !== undefined) p.faceMole = st.skin.marks;
-          if (st.skin.oil !== undefined) p.faceShine = st.skin.oil;
-          if (st.skin.circles !== undefined) p.darkCircles = st.skin.circles;
-          if (st.skin.bags !== undefined) p.eyeBags = st.skin.bags;
-          if (st.skin.wFore !== undefined) p.foreheadWrinkles = st.skin.wFore;
-          if (st.skin.wNose !== undefined) p.nasolabialFolds = st.skin.wNose;
-          if (st.skin.wNeck !== undefined) p.neckWrinkles = st.skin.wNeck;
-          if (st.skin.glare !== undefined) p.glassesGlare = st.skin.glare;
-          if (st.skin.teeth !== undefined) p.teethWhiten = st.skin.teeth;
-          if (st.skin.eyes !== undefined) p.eyeBrighten = st.skin.eyes;
-          if (st.skin.lip !== undefined) p.makeupLipstick = st.skin.lip;
-          if (st.skin.blush !== undefined) p.makeupBlush = st.skin.blush;
-          if (st.skin.cloth !== undefined) p.clothingDewrinkle = st.skin.cloth;
-        }
-        if (st.shape) {
-          if (st.shape.faceSize !== undefined) p.faceWidth = -st.shape.faceSize;
-          if (st.shape.jaw !== undefined) p.jawlineSlim = st.shape.jaw;
-          if (st.shape.eyes !== undefined) p.eyeSize = st.shape.eyes;
-          if (st.shape.mouth !== undefined) p.mouthSize = st.shape.mouth;
-          if (st.shape.nose !== undefined) p.noseWidth = -st.shape.nose;
-          if (st.shape.smile !== undefined) p.smileEnhance = st.shape.smile;
-          if (st.shape.chinLen !== undefined) p.chinLength = st.shape.chinLen;
-        }
-      }
-
       StuUltra.syncSlidersFromParams(photo._stuUltraParams);
-      StuUltra.renderHistogram();
       StuUltra.renderToneCurve();
       StuUltra.syncBatchCount();
+
+      getPhotoOriginalDataUrl(photo).then(function() {
+        StuUltra.renderViewport(photo);
+      });
     },
 
     syncSlidersFromParams: function(p) {
@@ -862,58 +940,87 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
           var badge = cont.querySelector('.val[data-for="' + key + '"]');
           if (badge) {
             badge.textContent = formatSliderBadgeValue(p[key], key);
-            var isChanged = Math.abs(Number(p[key]) - Number(DEFAULT_PARAMS[key] || 0)) > 1e-4;
+            var isChanged = Math.abs(p[key] - (DEFAULT_PARAMS[key] || 0)) > 1e-4;
             badge.classList.toggle('modified', isChanged);
           }
         }
       });
     },
 
-    renderHistogram: function() {
-      var cont = StuUltra.container;
-      if (!cont) return;
-      var canvas = cont.querySelector('#histogram-canvas');
-      if (!canvas) return;
+    renderHistogramFromDataUrl: function(dataUrl) {
+      var canvas = document.getElementById('histogram-canvas');
+      if (!canvas || !dataUrl) return;
       var ctx = canvas.getContext('2d');
-      var w = canvas.width;
-      var h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
+      var img = new Image();
+      img.onload = function() {
+        var sampleW = 120;
+        var sampleH = Math.round(120 * (img.naturalHeight / (img.naturalWidth || 1)));
+        var offCanvas = document.createElement('canvas');
+        offCanvas.width = sampleW;
+        offCanvas.height = sampleH;
+        var offCtx = offCanvas.getContext('2d');
+        offCtx.drawImage(img, 0, 0, sampleW, sampleH);
+        var imgData = offCtx.getImageData(0, 0, sampleW, sampleH).data;
 
-      var drawCurve = function(color, peaks) {
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(0, h);
-        for (var i = 0; i <= 64; i++) {
-          var x = (i / 64) * w;
-          var val = 0;
-          for (var p = 0; p < peaks.length; p++) {
-            var dist = Math.abs(i - peaks[p].x);
-            val += peaks[p].h * Math.exp(-dist * dist / peaks[p].w);
-          }
-          var y = h - Math.min(h - 4, val * (h - 6));
-          ctx.lineTo(x, y);
+        var rHist = new Float32Array(256);
+        var gHist = new Float32Array(256);
+        var bHist = new Float32Array(256);
+        var totalPx = sampleW * sampleH;
+        var sumR = 0, sumG = 0, sumB = 0;
+
+        for (var i = 0; i < imgData.length; i += 4) {
+          var r = imgData[i];
+          var g = imgData[i + 1];
+          var b = imgData[i + 2];
+          rHist[r]++;
+          gHist[g]++;
+          bHist[b]++;
+          sumR += r;
+          sumG += g;
+          sumB += b;
         }
-        ctx.lineTo(w, h);
-        ctx.closePath();
-        ctx.fill();
+
+        var meanEl = document.getElementById('hist-rgb-mean');
+        if (meanEl) {
+          meanEl.textContent = 'R ' + Math.round(sumR / totalPx) + ' · G ' + Math.round(sumG / totalPx) + ' · B ' + Math.round(sumB / totalPx);
+        }
+
+        // Find max peak (ignore extreme zero and 255)
+        var maxPeak = 1;
+        for (var j = 1; j < 255; j++) {
+          if (rHist[j] > maxPeak) maxPeak = rHist[j];
+          if (gHist[j] > maxPeak) maxPeak = gHist[j];
+          if (bHist[j] > maxPeak) maxPeak = bHist[j];
+        }
+
+        var w = canvas.width;
+        var h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        var drawChannel = function(hist, color) {
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.moveTo(0, h);
+          for (var x = 0; x < 256; x++) {
+            var val = hist[x] / maxPeak;
+            var px = (x / 255) * w;
+            var py = h - Math.min(h, val * h * 0.95);
+            ctx.lineTo(px, py);
+          }
+          ctx.lineTo(w, h);
+          ctx.closePath();
+          ctx.fill();
+        };
+
+        drawChannel(rHist, 'rgba(239, 68, 68, 0.45)');
+        drawChannel(gHist, 'rgba(34, 197, 94, 0.45)');
+        drawChannel(bHist, 'rgba(59, 130, 246, 0.45)');
       };
-
-      ctx.globalCompositeOperation = 'screen';
-      drawCurve('rgba(239, 68, 68, 0.58)', [{x: 48, h: 0.92, w: 32}, {x: 20, h: 0.4, w: 45}]);
-      drawCurve('rgba(34, 197, 94, 0.58)', [{x: 42, h: 0.75, w: 40}, {x: 16, h: 0.55, w: 30}]);
-      drawCurve('rgba(59, 130, 246, 0.62)', [{x: 18, h: 0.85, w: 40}, {x: 35, h: 0.45, w: 35}]);
-      ctx.globalCompositeOperation = 'source-over';
-
-      var meanEl = cont.querySelector('#hist-rgb-mean');
-      if (meanEl) {
-        meanEl.textContent = 'R 145 · G 133 · B 146';
-      }
+      img.src = dataUrl;
     },
 
     renderToneCurve: function() {
-      var cont = StuUltra.container;
-      if (!cont) return;
-      var canvas = cont.querySelector('#tone-curve-canvas');
+      var canvas = document.getElementById('tone-curve-canvas');
       if (!canvas) return;
       var ctx = canvas.getContext('2d');
       var w = canvas.width;
@@ -923,8 +1030,8 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
       ctx.lineWidth = 1;
       for (var g = 1; g <= 3; g++) {
-        var gx = (w * g) / 4;
-        var gy = (h * g) / 4;
+        var gx = (w / 4) * g;
+        var gy = (h / 4) * g;
         ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
       }
@@ -947,7 +1054,7 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
         ctx.beginPath();
         ctx.arc(pt[0], pt[1], 4, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#101115';
+        ctx.strokeStyle = '#0f1013';
         ctx.lineWidth = 1.5;
         ctx.stroke();
       });
@@ -955,15 +1062,45 @@ const moduleJs = `// assets/stu_ultra_module.js - DEVSTU STU Ultra Inspector & R
   };
 
   window.StuUltra = StuUltra;
+  window._stuUltraSetSlider = function(key, val) {
+    var A = window._devstuA;
+    var photo = A && A.current;
+    if (!photo) return;
+    if (!photo._stuUltraParams) photo._stuUltraParams = createDefaultParams();
+    photo._stuUltraParams[key] = parseFloat(val);
+    var cont = StuUltra.container;
+    if (cont) {
+      var slider = cont.querySelector('#' + key);
+      if (slider) {
+        slider.value = val;
+        var badge = cont.querySelector('.val[data-for="' + key + '"]');
+        if (badge) {
+          badge.textContent = formatSliderBadgeValue(val, key);
+          badge.classList.toggle('modified', true);
+        }
+      }
+    }
+  };
+  window._stuUltraTriggerRender = function(highQuality) {
+    var A = window._devstuA;
+    var photo = A && A.current;
+    if (photo) {
+      StuUltra.triggerRustProcess(photo, highQuality);
+    }
+  };
+  window._stuUltraApplyPreset = function(presetKey) {
+    StuUltra.applyPreset(presetKey);
+  };
+  window.__STU_ULTRA_ENGINE_STATUS = 'ready';
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', StuUltra.init);
   } else {
-    setTimeout(StuUltra.init, 50);
+    StuUltra.init();
   }
 
 })(window);
 `;
 
 fs.writeFileSync('assets/stu_ultra_module.js', moduleJs, 'utf8');
-console.log('Successfully wrote updated assets/stu_ultra_module.js with full HSL & Retouch engine sync! (length: ' + moduleJs.length + ')');
+console.log('Successfully wrote updated assets/stu_ultra_module.js with Collabs-Retouch-Pro Rust SIMD integration! (length: ' + moduleJs.length + ')');
