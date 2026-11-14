@@ -115,17 +115,32 @@
     return null;
   }
 
+  // Calculate thumbnail dimensions maintaining exact aspect ratio
+  function calcThumbDimensions(w, h, maxDim) {
+    maxDim = maxDim || 360;
+    var scale = Math.min(1, maxDim / Math.max(w, h));
+    return {
+      width: Math.max(1, Math.round(w * scale)),
+      height: Math.max(1, Math.round(h * scale))
+    };
+  }
+
   // Apply in-place result to photo with proper DEVSTU WebGL GPU texture reload
   async function applyInPlaceResult(photo, dataUrl, filename, isAi) {
     var newFile = dataURLtoFile(dataUrl, filename);
 
-    // Create ImageBitmap and thumbnails
+    // Create ImageBitmap and proportional thumbnails
     var newBmp = null;
     var newThumb = null;
     try {
       if (typeof createImageBitmap === 'function') {
         newBmp = await createImageBitmap(newFile);
-        newThumb = await createImageBitmap(newBmp, { resizeWidth: 160, resizeHeight: 120, resizeQuality: 'medium' });
+        var tDim = calcThumbDimensions(newBmp.width, newBmp.height, 360);
+        newThumb = await createImageBitmap(newBmp, {
+          resizeWidth: tDim.width,
+          resizeHeight: tDim.height,
+          resizeQuality: 'high'
+        });
       }
     } catch (e) {
       console.warn('[CollabsAI] createImageBitmap error:', e);
@@ -142,10 +157,20 @@
       photo.width = newBmp.width;
       photo.height = newBmp.height;
     }
-    if (newThumb) {
-      photo.thumb = newThumb;
-      photo.editedThumb = null;
+    
+    // Close previous thumbnails to prevent memory leaks and clear stale cache
+    if (photo.editedThumb && typeof photo.editedThumb.close === 'function') {
+      try { photo.editedThumb.close(); } catch (e) {}
     }
+    photo.editedThumb = null;
+
+    if (newThumb) {
+      if (photo.thumb && typeof photo.thumb.close === 'function') {
+        try { photo.thumb.close(); } catch (e) {}
+      }
+      photo.thumb = newThumb;
+    }
+
     photo._devstuDataUrl = dataUrl;
     photo._isAiVersion = !!isAi;
 
@@ -175,8 +200,11 @@
     var b = photo._originalBackup;
     photo.file = b.file;
     photo.src = b.src;
+    if (photo.editedThumb && typeof photo.editedThumb.close === 'function') {
+      try { photo.editedThumb.close(); } catch (e) {}
+    }
+    photo.editedThumb = null;
     if (b.thumb) photo.thumb = b.thumb;
-    if (b.editedThumb) photo.editedThumb = b.editedThumb;
     if (b.dataUrl) photo._devstuDataUrl = b.dataUrl;
     if (b.width) photo.width = b.width;
     if (b.height) photo.height = b.height;
