@@ -1,0 +1,1265 @@
+<aside class="retouch-right-inspector">
+          <div class="right-panel-topheader">
+            <span id="right-module-title">Chỉnh sửa chân dung</span>
+          </div>
+
+          <div class="right-inspector-scroll">
+            <!-- BIỂU ĐỒ RGB + CHẾ ĐỘ CHỈNH MÀU THỜI GIAN THỰC -->
+            <div class="retouch-histogram-block">
+              <div class="hist-collapse-head" id="btn-toggle-histogram">
+                <span>▾ Biểu đồ</span>
+                <span id="hist-exposure-info">16-bit • Rust SIMD</span>
+              </div>
+              <div id="hist-body-wrap">
+                <div class="hist-card-shell">
+                  <canvas id="histogram-canvas" width="290" height="68"></canvas>
+                  <div class="hist-telemetry-row">
+                    <span>sRGB</span>
+                    <span>RGBA</span>
+                    <span id="hist-rgb-mean">R - · G - · B -</span>
+                  </div>
+                </div>
+              </div>
+              <div class="evoto-realtime-row">
+                <span>Chế độ chỉnh màu thời gian thực</span>
+                <button
+                  id="toggle-realtime-color"
+                  type="button"
+                  role="switch"
+                  aria-checked="true"
+                  class="evoto-switch on"
+                  title="Tắt nếu máy xử lý ảnh RAW lớn bị chậm khi kéo nhanh (chỉ xử lý khi thả chuột)"
+                >
+                  <span class="evoto-switch-knob"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- MODULE 1: ĐIỀU CHỈNH MÀU (100% ĐỦ TOÀN BỘ THANH TRƯỢT + ĐƯỜNG CONG + HSL + LENS + GRAIN) -->
+            <div id="mod-color" class="retouch-module-pane">
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ Bộ lọc &amp; Hồ sơ màu</div>
+                <div class="retouch-acc-body">
+                  <select id="lutPreset" class="retouch-select">
+                    <option value="none">Màu tiêu chuẩn Studio</option>
+                    <option value="clean_portrait">Chân dung thương mại trong trẻo</option>
+                    <option value="fuji_pro">Fujifilm Pro 400H Dịu nhẹ</option>
+                    <option value="kodak_gold">Kodak Portra 400 Ấm áp</option>
+                    <option value="cinematic_teal">Điện ảnh Teal &amp; Cam</option>
+                    <option value="warm_wedding">Ánh vàng Giờ Vàng (Ảnh cưới)</option>
+                    <option value="bw_studio">Phim Đen Trắng Ilford Delta</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ AI Khớp màu (Từ ảnh tham chiếu)</div>
+                <div class="retouch-acc-body">
+                  <div style="display: flex; gap: 6px; align-items: center">
+                    <button id="btn-load-color-ref" class="retouch-sync-btn" style="flex: 1">+ Chọn ảnh mẫu màu</button>
+                    <button id="btn-clear-color-ref" class="retouch-sync-btn" title="Xóa ảnh mẫu">Xóa</button>
+                  </div>
+                  <div class="retouch-slider-item" style="margin-top: 4px">
+                    <div class="s-head"><span>Cường độ khớp màu</span><span class="val" data-for="colorMatchStrength">0</span></div>
+                    <input type="range" class="retouch-slider" id="colorMatchStrength" min="0" max="100" value="0" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ Cân bằng trắng</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item">
+                    <div class="s-head"><span>Nhiệt độ màu (Temp)</span><span class="val" data-for="temperature">0</span></div>
+                    <input type="range" class="retouch-slider wb-temp" id="temperature" min="-100" max="100" value="0" />
+                  </div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head"><span>Sắc thái màu (Tint)</span><span class="val" data-for="tint">0</span></div>
+                    <input type="range" class="retouch-slider wb-tint" id="tint" min="-100" max="100" value="0" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ Cơ Bản — Tông màu &amp; Độ nét</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Phơi sáng (Exposure)</span><span class="val" data-for="exposure">0</span></div><input type="range" class="retouch-slider" id="exposure" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Tương phản (Contrast)</span><span class="val" data-for="contrast">0</span></div><input type="range" class="retouch-slider" id="contrast" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Vùng sáng (Highlights)</span><span class="val" data-for="highlights">0</span></div><input type="range" class="retouch-slider" id="highlights" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Vùng tối (Shadows)</span><span class="val" data-for="shadows">0</span></div><input type="range" class="retouch-slider" id="shadows" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Điểm trắng (Whites)</span><span class="val" data-for="whites">0</span></div><input type="range" class="retouch-slider" id="whites" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Điểm đen (Blacks)</span><span class="val" data-for="blacks">0</span></div><input type="range" class="retouch-slider" id="blacks" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Kết cấu (Texture)</span><span class="val" data-for="texture">0</span></div><input type="range" class="retouch-slider" id="texture" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ nét cục bộ (Clarity)</span><span class="val" data-for="clarity">0</span></div><input type="range" class="retouch-slider" id="clarity" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử sương mù (Dehaze)</span><span class="val" data-for="dehaze">0</span></div><input type="range" class="retouch-slider" id="dehaze" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ tươi (Vibrance)</span><span class="val" data-for="vibrance">0</span></div><input type="range" class="retouch-slider" id="vibrance" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ bão hòa (Saturation)</span><span class="val" data-for="saturation">0</span></div><input type="range" class="retouch-slider" id="saturation" min="-100" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ Đường cong tông màu (256-LUT)</div>
+                <div class="retouch-acc-body">
+                  <div class="curve-canvas-box">
+                    <canvas id="tone-curve-canvas" width="268" height="170" title="Nhấp để thêm điểm · Kéo để chỉnh · Nhấp đúp vào điểm để xóa"></canvas>
+                    <div class="curve-toolbar-row">
+                      <span class="curve-hint">Kéo điểm trên biểu đồ</span>
+                      <button id="btn-reset-curve" class="mini-save-btn">Đặt lại đường cong</button>
+                    </div>
+                  </div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Điểm rất sáng (Highlights)</span><span class="val" data-for="curveHighlights">0</span></div><input type="range" class="retouch-slider" id="curveHighlights" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Vùng sáng vừa (Lights)</span><span class="val" data-for="curveLights">0</span></div><input type="range" class="retouch-slider" id="curveLights" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Vùng tối vừa (Darks)</span><span class="val" data-for="curveDarks">0</span></div><input type="range" class="retouch-slider" id="curveDarks" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Vùng tối sâu (Shadows)</span><span class="val" data-for="curveShadows">0</span></div><input type="range" class="retouch-slider" id="curveShadows" min="-100" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ HSL 8 Kênh màu</div>
+                <div class="retouch-acc-body">
+                  <div class="hsl-color-dots" id="hsl-band-tabs">
+                    <button class="hsl-dot active" data-hsl="Red" style="background: #ef4444" title="Đỏ"></button>
+                    <button class="hsl-dot" data-hsl="Orange" style="background: #f97316" title="Cam (Tông da)"></button>
+                    <button class="hsl-dot" data-hsl="Yellow" style="background: #eab308" title="Vàng"></button>
+                    <button class="hsl-dot" data-hsl="Green" style="background: #22c55e" title="Xanh lá"></button>
+                    <button class="hsl-dot" data-hsl="Aqua" style="background: #06b6d4" title="Xanh ngọc"></button>
+                    <button class="hsl-dot" data-hsl="Blue" style="background: #3b82f6" title="Xanh dương"></button>
+                    <button class="hsl-dot" data-hsl="Purple" style="background: #a855f7" title="Tím"></button>
+                    <button class="hsl-dot" data-hsl="Magenta" style="background: #ec4899" title="Hồng cánh sen"></button>
+                  </div>
+
+                  <div class="hsl-band-pane active" data-hsl-pane="Red">
+                    <div class="sub-badge">Kênh Đỏ</div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Sắc độ Đỏ</span><span class="val" data-for="hslRedHue">0</span></div><input type="range" class="retouch-slider hsl-grad-hue" id="hslRedHue" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ bão hòa Đỏ</span><span class="val" data-for="hslRedSat">0</span></div><input type="range" class="retouch-slider" id="hslRedSat" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ chói Đỏ</span><span class="val" data-for="hslRedLum">0</span></div><input type="range" class="retouch-slider" id="hslRedLum" min="-100" max="100" value="0" /></div>
+                  </div>
+                  <div class="hsl-band-pane" data-hsl-pane="Orange">
+                    <div class="sub-badge">Kênh Cam (Tông da)</div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Sắc độ Cam</span><span class="val" data-for="hslOrangeHue">0</span></div><input type="range" class="retouch-slider hsl-grad-hue" id="hslOrangeHue" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ bão hòa Cam</span><span class="val" data-for="hslOrangeSat">0</span></div><input type="range" class="retouch-slider" id="hslOrangeSat" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ chói Cam</span><span class="val" data-for="hslOrangeLum">0</span></div><input type="range" class="retouch-slider" id="hslOrangeLum" min="-100" max="100" value="0" /></div>
+                  </div>
+                  <div class="hsl-band-pane" data-hsl-pane="Yellow">
+                    <div class="sub-badge">Kênh Vàng</div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Sắc độ Vàng</span><span class="val" data-for="hslYellowHue">0</span></div><input type="range" class="retouch-slider hsl-grad-hue" id="hslYellowHue" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ bão hòa Vàng</span><span class="val" data-for="hslYellowSat">0</span></div><input type="range" class="retouch-slider" id="hslYellowSat" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ chói Vàng</span><span class="val" data-for="hslYellowLum">0</span></div><input type="range" class="retouch-slider" id="hslYellowLum" min="-100" max="100" value="0" /></div>
+                  </div>
+                  <div class="hsl-band-pane" data-hsl-pane="Green">
+                    <div class="sub-badge">Kênh Xanh lá</div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Sắc độ Xanh lá</span><span class="val" data-for="hslGreenHue">0</span></div><input type="range" class="retouch-slider hsl-grad-hue" id="hslGreenHue" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ bão hòa Xanh lá</span><span class="val" data-for="hslGreenSat">0</span></div><input type="range" class="retouch-slider" id="hslGreenSat" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ chói Xanh lá</span><span class="val" data-for="hslGreenLum">0</span></div><input type="range" class="retouch-slider" id="hslGreenLum" min="-100" max="100" value="0" /></div>
+                  </div>
+                  <div class="hsl-band-pane" data-hsl-pane="Aqua">
+                    <div class="sub-badge">Kênh Xanh ngọc</div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Sắc độ Xanh ngọc</span><span class="val" data-for="hslAquaHue">0</span></div><input type="range" class="retouch-slider hsl-grad-hue" id="hslAquaHue" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ bão hòa Xanh ngọc</span><span class="val" data-for="hslAquaSat">0</span></div><input type="range" class="retouch-slider" id="hslAquaSat" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ chói Xanh ngọc</span><span class="val" data-for="hslAquaLum">0</span></div><input type="range" class="retouch-slider" id="hslAquaLum" min="-100" max="100" value="0" /></div>
+                  </div>
+                  <div class="hsl-band-pane" data-hsl-pane="Blue">
+                    <div class="sub-badge">Kênh Xanh dương</div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Sắc độ Xanh dương</span><span class="val" data-for="hslBlueHue">0</span></div><input type="range" class="retouch-slider hsl-grad-hue" id="hslBlueHue" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ bão hòa Xanh dương</span><span class="val" data-for="hslBlueSat">0</span></div><input type="range" class="retouch-slider" id="hslBlueSat" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ chói Xanh dương</span><span class="val" data-for="hslBlueLum">0</span></div><input type="range" class="retouch-slider" id="hslBlueLum" min="-100" max="100" value="0" /></div>
+                  </div>
+                  <div class="hsl-band-pane" data-hsl-pane="Purple">
+                    <div class="sub-badge">Kênh Tím</div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Sắc độ Tím</span><span class="val" data-for="hslPurpleHue">0</span></div><input type="range" class="retouch-slider hsl-grad-hue" id="hslPurpleHue" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ bão hòa Tím</span><span class="val" data-for="hslPurpleSat">0</span></div><input type="range" class="retouch-slider" id="hslPurpleSat" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ chói Tím</span><span class="val" data-for="hslPurpleLum">0</span></div><input type="range" class="retouch-slider" id="hslPurpleLum" min="-100" max="100" value="0" /></div>
+                  </div>
+                  <div class="hsl-band-pane" data-hsl-pane="Magenta">
+                    <div class="sub-badge">Kênh Hồng cánh sen</div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Sắc độ Hồng</span><span class="val" data-for="hslMagentaHue">0</span></div><input type="range" class="retouch-slider hsl-grad-hue" id="hslMagentaHue" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ bão hòa Hồng</span><span class="val" data-for="hslMagentaSat">0</span></div><input type="range" class="retouch-slider" id="hslMagentaSat" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ chói Hồng</span><span class="val" data-for="hslMagentaLum">0</span></div><input type="range" class="retouch-slider" id="hslMagentaLum" min="-100" max="100" value="0" /></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Phân loại màu sắc (Vùng tối / Sáng)</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Màu vùng tối (Shadow Hue)</span><span class="val" data-for="gradeShadowHue">210</span></div><input type="range" class="retouch-slider" id="gradeShadowHue" min="0" max="360" value="210" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Cường độ màu vùng tối</span><span class="val" data-for="gradeShadowSat">0</span></div><input type="range" class="retouch-slider" id="gradeShadowSat" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Màu vùng sáng (Highlight Hue)</span><span class="val" data-for="gradeHighHue">38</span></div><input type="range" class="retouch-slider" id="gradeHighHue" min="0" max="360" value="38" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Cường độ màu vùng sáng</span><span class="val" data-for="gradeHighSat">0</span></div><input type="range" class="retouch-slider" id="gradeHighSat" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Màu trung tính (Midtone Hue)</span><span class="val" data-for="gradeMidHue">120</span></div><input type="range" class="retouch-slider" id="gradeMidHue" min="0" max="360" value="120" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Cường độ trung tính</span><span class="val" data-for="gradeMidSat">0</span></div><input type="range" class="retouch-slider" id="gradeMidSat" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Màu tổng thể (Global Hue)</span><span class="val" data-for="gradeGlobalHue">45</span></div><input type="range" class="retouch-slider" id="gradeGlobalHue" min="0" max="360" value="45" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Cường độ tổng thể</span><span class="val" data-for="gradeGlobalSat">0</span></div><input type="range" class="retouch-slider" id="gradeGlobalSat" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ sáng vùng tối</span><span class="val" data-for="gradeShadowLum">0</span></div><input type="range" class="retouch-slider" id="gradeShadowLum" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ sáng trung tính</span><span class="val" data-for="gradeMidLum">0</span></div><input type="range" class="retouch-slider" id="gradeMidLum" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ sáng vùng sáng</span><span class="val" data-for="gradeHighLum">0</span></div><input type="range" class="retouch-slider" id="gradeHighLum" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ sáng tổng thể</span><span class="val" data-for="gradeGlobalLum">0</span></div><input type="range" class="retouch-slider" id="gradeGlobalLum" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Hòa trộn (Blending)</span><span class="val" data-for="gradeBlending">50</span></div><input type="range" class="retouch-slider" id="gradeBlending" min="0" max="100" value="50" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Cân bằng Sáng/Tối</span><span class="val" data-for="gradeBalance">0</span></div><input type="range" class="retouch-slider" id="gradeBalance" min="-100" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Trộn kênh Đen &amp; Trắng</div>
+                <div class="retouch-acc-body">
+                  <select id="treatment" class="retouch-select" style="margin-bottom: 6px">
+                    <option value="color">Ảnh Màu</option>
+                    <option value="bw">Đen &amp; Trắng (B&amp;W)</option>
+                  </select>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Đỏ</span><span class="val" data-for="bwRed">0</span></div><input type="range" class="retouch-slider" id="bwRed" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Cam</span><span class="val" data-for="bwOrange">0</span></div><input type="range" class="retouch-slider" id="bwOrange" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Vàng</span><span class="val" data-for="bwYellow">0</span></div><input type="range" class="retouch-slider" id="bwYellow" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Xanh lá</span><span class="val" data-for="bwGreen">0</span></div><input type="range" class="retouch-slider" id="bwGreen" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Xanh ngọc</span><span class="val" data-for="bwAqua">0</span></div><input type="range" class="retouch-slider" id="bwAqua" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Xanh dương</span><span class="val" data-for="bwBlue">0</span></div><input type="range" class="retouch-slider" id="bwBlue" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Tím</span><span class="val" data-for="bwPurple">0</span></div><input type="range" class="retouch-slider" id="bwPurple" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Hồng cánh sen</span><span class="val" data-for="bwMagenta">0</span></div><input type="range" class="retouch-slider" id="bwMagenta" min="-100" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Chi tiết — Làm nét &amp; Khử nhiễu AI</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử nhiễu AI (RAW &amp; JPG)</span><span class="val" data-for="aiDenoise">0</span></div><input type="range" class="retouch-slider" id="aiDenoise" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Giữ chi tiết khi khử nhiễu</span><span class="val" data-for="nrDetail">50</span></div><input type="range" class="retouch-slider" id="nrDetail" min="0" max="100" value="50" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử nhiễu độ sáng</span><span class="val" data-for="noiseReduction">0</span></div><input type="range" class="retouch-slider" id="noiseReduction" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử nhiễu màu</span><span class="val" data-for="nrColor">0</span></div><input type="range" class="retouch-slider" id="nrColor" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Tăng nét (Sharpening)</span><span class="val" data-for="sharpenAmount">0</span></div><input type="range" class="retouch-slider" id="sharpenAmount" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Bán kính làm nét</span><span class="val" data-for="sharpenRadius">1</span></div><input type="range" class="retouch-slider" id="sharpenRadius" min="0.5" max="3" value="1" step="0.1" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Chi tiết vùng nét</span><span class="val" data-for="sharpenDetail">25</span></div><input type="range" class="retouch-slider" id="sharpenDetail" min="0" max="100" value="25" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Mặt nạ vùng nét (Masking)</span><span class="val" data-for="sharpenMasking">0</span></div><input type="range" class="retouch-slider" id="sharpenMasking" min="0" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Nhiễu hạt &amp; Tối góc (Hiệu ứng)</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Hạt phim (Film Grain)</span><span class="val" data-for="filmGrain">0</span></div><input type="range" class="retouch-slider" id="filmGrain" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Kích thước hạt</span><span class="val" data-for="grainSize">25</span></div><input type="range" class="retouch-slider" id="grainSize" min="0" max="100" value="25" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ thô hạt</span><span class="val" data-for="grainRoughness">50</span></div><input type="range" class="retouch-slider" id="grainRoughness" min="0" max="100" value="50" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Tối góc (Vignette)</span><span class="val" data-for="vignette">0</span></div><input type="range" class="retouch-slider" id="vignette" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Điểm giữa tối góc</span><span class="val" data-for="vignetteMidpoint">50</span></div><input type="range" class="retouch-slider" id="vignetteMidpoint" min="0" max="100" value="50" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ tròn tối góc</span><span class="val" data-for="vignetteRoundness">0</span></div><input type="range" class="retouch-slider" id="vignetteRoundness" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm mềm viền tối góc</span><span class="val" data-for="vignetteFeather">50</span></div><input type="range" class="retouch-slider" id="vignetteFeather" min="0" max="100" value="50" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Giữ vùng sáng ở góc</span><span class="val" data-for="vignetteHighlights">0</span></div><input type="range" class="retouch-slider" id="vignetteHighlights" min="0" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Hiệu chỉnh ống kính</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Hiệu chỉnh méo hình</span><span class="val" data-for="opticsDistortion">0</span></div><input type="range" class="retouch-slider" id="opticsDistortion" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử tối góc ống kính</span><span class="val" data-for="opticsVignetting">0</span></div><input type="range" class="retouch-slider" id="opticsVignetting" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Điểm giữa ống kính</span><span class="val" data-for="opticsVignettingMidpoint">50</span></div><input type="range" class="retouch-slider" id="opticsVignettingMidpoint" min="0" max="100" value="50" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Sắc sai — Đỏ/Lục lam</span><span class="val" data-for="opticsCaRed">0</span></div><input type="range" class="retouch-slider" id="opticsCaRed" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Sắc sai — Xanh/Vàng</span><span class="val" data-for="opticsCaBlue">0</span></div><input type="range" class="retouch-slider" id="opticsCaBlue" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử viền tím</span><span class="val" data-for="opticsDefringePurple">0</span></div><input type="range" class="retouch-slider" id="opticsDefringePurple" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử viền xanh lá</span><span class="val" data-for="opticsDefringeGreen">0</span></div><input type="range" class="retouch-slider" id="opticsDefringeGreen" min="0" max="100" value="0" /></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MODULE 2: CHỈNH SỬA CHÂN DUNG (MẶC ĐỊNH MỞ KHI KHỞI ĐỘNG) -->
+            <div id="mod-portrait" class="retouch-module-pane active">
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ Khử khuyết điểm</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Tàn nhang &amp; Mụn trứng cá</span><span class="val" data-for="freckleAcne">0</span></div><input type="range" class="retouch-slider" id="freckleAcne" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Nốt ruồi trên mặt</span><span class="val" data-for="faceMole">0</span></div><input type="range" class="retouch-slider" id="faceMole" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Giảm bóng dầu vùng chữ T</span><span class="val" data-for="faceShine">0</span></div><input type="range" class="retouch-slider" id="faceShine" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Quầng thâm dưới mắt</span><span class="val" data-for="darkCircles">0</span></div><input type="range" class="retouch-slider" id="darkCircles" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Bọng mắt &amp; Nếp mí dưới</span><span class="val" data-for="eyeBags">0</span></div><input type="range" class="retouch-slider" id="eyeBags" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Nếp nhăn trán</span><span class="val" data-for="foreheadWrinkles">0</span></div><input type="range" class="retouch-slider" id="foreheadWrinkles" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Rãnh cười (Khóe mũi miệng)</span><span class="val" data-for="nasolabialFolds">0</span></div><input type="range" class="retouch-slider" id="nasolabialFolds" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Nếp nhăn vùng cổ</span><span class="val" data-for="neckWrinkles">0</span></div><input type="range" class="retouch-slider" id="neckWrinkles" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử lóa mắt kính</span><span class="val" data-for="glassesGlare">0</span></div><input type="range" class="retouch-slider" id="glassesGlare" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Giảm nọng cằm</span><span class="val" data-for="doubleChin">0</span></div><input type="range" class="retouch-slider" id="doubleChin" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khuyết điểm da cơ thể</span><span class="val" data-for="bodyBlemish">0</span></div><input type="range" class="retouch-slider" id="bodyBlemish" min="0" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ Làm mịn da &amp; Điều chỉnh tông da</div>
+                <div class="retouch-acc-body">
+                  <div class="sub-badge">Làm đều sáng tối (Dodge &amp; Burn)</div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm đều bề mặt da (Even)</span><span class="val" data-for="dodgeBurnEven">0</span></div><input type="range" class="retouch-slider" id="dodgeBurnEven" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Tạo khối sáng tối 3D (Sculpt)</span><span class="val" data-for="dodgeBurnSculpt">0</span></div><input type="range" class="retouch-slider" id="dodgeBurnSculpt" min="0" max="100" value="0" /></div>
+
+                  <div class="sub-badge">Tách tần số da (Frequency Separation)</div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm mịn tần số thấp (Màu da)</span><span class="val" data-for="freqSepLow">0</span></div><input type="range" class="retouch-slider" id="freqSepLow" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Giữ hạt lỗ chân lông (High Freq)</span><span class="val" data-for="freqSepHigh">80</span></div><input type="range" class="retouch-slider" id="freqSepHigh" min="0" max="100" value="80" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm mịn da mặt</span><span class="val" data-for="facialSkinSmooth">0</span></div><input type="range" class="retouch-slider" id="facialSkinSmooth" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm mịn da cơ thể</span><span class="val" data-for="bodySkinSmooth">0</span></div><input type="range" class="retouch-slider" id="bodySkinSmooth" min="0" max="100" value="0" /></div>
+
+                  <div class="sub-badge">Sắc tố &amp; Độ rạng rỡ</div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm đều tông màu da</span><span class="val" data-for="unifyComplexion">0</span></div><input type="range" class="retouch-slider" id="unifyComplexion" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm sáng rạng rỡ da</span><span class="val" data-for="skinRadiance">0</span></div><input type="range" class="retouch-slider" id="skinRadiance" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Màu da hồng hào</span><span class="val" data-for="skinRosy">0</span></div><input type="range" class="retouch-slider" id="skinRosy" min="-100" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ ấm màu da</span><span class="val" data-for="skinWarmth">0</span></div><input type="range" class="retouch-slider" id="skinWarmth" min="-100" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Định hình khuôn mặt (3D Liquify)</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ rộng khuôn mặt</span><span class="val" data-for="faceWidth">0</span></div><input type="range" class="retouch-slider" id="faceWidth" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Thon gọn xương hàm (V-Line)</span><span class="val" data-for="jawlineSlim">0</span></div><input type="range" class="retouch-slider" id="jawlineSlim" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Thu nâng gò má</span><span class="val" data-for="cheekboneLift">0</span></div><input type="range" class="retouch-slider" id="cheekboneLift" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ dài cằm</span><span class="val" data-for="chinLength">0</span></div><input type="range" class="retouch-slider" id="chinLength" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ cao trán</span><span class="val" data-for="foreheadHeight">0</span></div><input type="range" class="retouch-slider" id="foreheadHeight" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Thu gọn cánh mũi</span><span class="val" data-for="noseWidth">0</span></div><input type="range" class="retouch-slider" id="noseWidth" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Nâng đầu mũi</span><span class="val" data-for="noseTipLift">0</span></div><input type="range" class="retouch-slider" id="noseTipLift" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Kích thước miệng</span><span class="val" data-for="mouthSize">0</span></div><input type="range" class="retouch-slider" id="mouthSize" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ đầy đặn môi</span><span class="val" data-for="lipPlump">0</span></div><input type="range" class="retouch-slider" id="lipPlump" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Nâng khóe miệng cười</span><span class="val" data-for="smileEnhance">0</span></div><input type="range" class="retouch-slider" id="smileEnhance" min="0" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Mắt &amp; Lông mày</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Kích thước mắt</span><span class="val" data-for="eyeSize">0</span></div><input type="range" class="retouch-slider" id="eyeSize" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm sáng tròng mắt</span><span class="val" data-for="eyeBrighten">0</span></div><input type="range" class="retouch-slider" id="eyeBrighten" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Tăng ánh sáng mắt (Catchlight)</span><span class="val" data-for="catchlightBoost">0</span></div><input type="range" class="retouch-slider" id="catchlightBoost" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Xóa tia máu đỏ mắt</span><span class="val" data-for="redVeins">0</span></div><input type="range" class="retouch-slider" id="redVeins" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ dày lông mày</span><span class="val" data-for="eyebrowThickness">0</span></div><input type="range" class="retouch-slider" id="eyebrowThickness" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Nâng dáng lông mày</span><span class="val" data-for="eyebrowLift">0</span></div><input type="range" class="retouch-slider" id="eyebrowLift" min="-50" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Làm đẹp răng</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm trắng răng</span><span class="val" data-for="teethWhiten">0</span></div><input type="range" class="retouch-slider" id="teethWhiten" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử ố vàng răng</span><span class="val" data-for="teethDesaturate">0</span></div><input type="range" class="retouch-slider" id="teethDesaturate" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Độ sáng răng</span><span class="val" data-for="teethBrighten">0</span></div><input type="range" class="retouch-slider" id="teethBrighten" min="0" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Trang điểm</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Bắt sáng (Highlight)</span><span class="val" data-for="makeupHighlight">0</span></div><input type="range" class="retouch-slider" id="makeupHighlight" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Tạo khối (Contour)</span><span class="val" data-for="makeupContour">0</span></div><input type="range" class="retouch-slider" id="makeupContour" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Má hồng</span><span class="val" data-for="makeupBlush">0</span></div><input type="range" class="retouch-slider" id="makeupBlush" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Phấn mắt</span><span class="val" data-for="makeupEyeshadow">0</span></div><input type="range" class="retouch-slider" id="makeupEyeshadow" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Cường độ son môi</span><span class="val" data-for="makeupLipstick">0</span></div><input type="range" class="retouch-slider" id="makeupLipstick" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head"><span>Màu son môi</span></div>
+                    <select id="makeupLipTint" class="retouch-select">
+                      <option value="rose">Hồng Nhung (Velvet Rose)</option>
+                      <option value="coral">Cam San Hô Ấm</option>
+                      <option value="berry">Đỏ Mận (Deep Berry)</option>
+                      <option value="nude">Nude Tự Nhiên</option>
+                      <option value="ruby">Đỏ Ruby Cổ Điển</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title cloth-acc-header">
+                  <span>▾ Điều chỉnh tóc</span>
+                  <button type="button" id="btn-hair-reset" class="cloth-reset-btn" title="Đặt lại toàn bộ điều chỉnh tóc">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                      <path d="M3 3v5h5" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="retouch-acc-body">
+                  <!-- Subgroup 1: Chỉnh sửa hình dáng tóc -->
+                  <div class="hair-subhead">Chỉnh sửa hình dáng tóc</div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head"><span>Làm đầy điểm hói</span><span class="val" data-for="hairPartLine">0</span></div>
+                    <input type="range" class="retouch-slider" id="hairPartLine" min="0" max="100" value="0" />
+                  </div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head">
+                      <span class="cloth-label-with-badges">
+                        Độ Dày Tóc Đỉnh Đầu
+                        <span class="cloth-help-dot" title="Tăng/giảm độ phồng đỉnh đầu (hộp sọ cao)">?</span>
+                      </span>
+                      <span class="val" data-for="hairVolume">0</span>
+                    </div>
+                    <input type="range" class="retouch-slider hair-centered" id="hairVolume" min="-100" max="100" value="0" />
+                  </div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head"><span>Tăng lượng tóc hai bên</span></div>
+                    <div class="hair-dual-row">
+                      <div class="hair-dual-col">
+                        <div class="s-head"><span>Trái</span><span class="val" data-for="hairSideLeftVolume">0</span></div>
+                        <input type="range" class="retouch-slider hair-centered" id="hairSideLeftVolume" min="-100" max="100" value="0" />
+                      </div>
+                      <button type="button" id="btn-hair-side-link" class="cloth-link-btn hair-side-link active" aria-pressed="true" title="Liên kết lượng tóc Trái &amp; Phải">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                        </svg>
+                      </button>
+                      <div class="hair-dual-col">
+                        <div class="s-head"><span>Phải</span><span class="val" data-for="hairSideRightVolume">0</span></div>
+                        <input type="range" class="retouch-slider hair-centered" id="hairSideRightVolume" min="-100" max="100" value="0" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head"><span>Đường chân tóc</span><span class="val" data-for="hairlineAdjust">0</span></div>
+                    <input type="range" class="retouch-slider hair-centered" id="hairlineAdjust" min="-100" max="100" value="0" />
+                  </div>
+
+                  <div class="bg-divider" style="margin: 10px 0;"></div>
+
+                  <!-- Subgroup 2: Hoàn thiện tóc -->
+                  <div class="hair-subhead">Hoàn thiện tóc</div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head">
+                      <span>Loại bỏ tóc gãy</span>
+                      <span class="cloth-val-with-arrow">
+                        <span class="val" data-for="strayHair">0</span>
+                        <button type="button" id="btn-hair-stray-expand" class="cloth-sub-arrow" aria-expanded="false" title="Mở tùy chọn vùng xóa tóc con">▸</button>
+                      </span>
+                    </div>
+                    <input type="range" class="retouch-slider" id="strayHair" min="0" max="100" value="0" />
+                    <div id="hair-stray-drawer" class="cloth-sub-drawer hidden">
+                      <div class="s-head" style="margin-top: 6px;"><span>Trong đường viền nhân vật</span><span class="val" data-for="strayHairInner">100</span></div>
+                      <input type="range" class="retouch-slider" id="strayHairInner" min="0" max="100" value="100" />
+                      <div class="s-head" style="margin-top: 6px;"><span>Ngoài đường viền nhân vật</span><span class="val" data-for="strayHairOuter">100</span></div>
+                      <input type="range" class="retouch-slider" id="strayHairOuter" min="0" max="100" value="100" />
+                    </div>
+                  </div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head">
+                      <span>Làm mượt tóc</span>
+                      <span class="cloth-val-with-arrow">
+                        <span class="val" data-for="hairSmooth">0</span>
+                        <button type="button" id="btn-hair-smooth-expand" class="cloth-sub-arrow" aria-expanded="false" title="Mở tinh chỉnh giảm xơ rối">▸</button>
+                      </span>
+                    </div>
+                    <input type="range" class="retouch-slider" id="hairSmooth" min="0" max="100" value="0" />
+                    <div id="hair-smooth-drawer" class="cloth-sub-drawer hidden">
+                      <div class="s-head" style="margin-top: 6px;"><span>Giảm xơ rối</span><span class="val" data-for="hairFrizzy">100</span></div>
+                      <input type="range" class="retouch-slider" id="hairFrizzy" min="0" max="100" value="100" />
+                    </div>
+                  </div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head"><span>Tăng độ bóng cho tóc</span><span class="val" data-for="hairShine">0</span></div>
+                    <input type="range" class="retouch-slider" id="hairShine" min="0" max="100" value="0" />
+                  </div>
+
+                  <div class="bg-divider" style="margin: 10px 0;"></div>
+
+                  <!-- Subgroup 3: Chỉnh sửa màu tóc -->
+                  <div class="hair-subhead">Chỉnh sửa màu tóc</div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head">
+                      <span class="cloth-label-with-badges">
+                        Tóc Đen Tóc Bạc
+                        <span class="evoto-beta-badge">Beta</span>
+                      </span>
+                      <span class="val" data-for="whiteHairBlacken">0</span>
+                    </div>
+                    <input type="range" class="retouch-slider" id="whiteHairBlacken" min="0" max="100" value="0" />
+                  </div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head">
+                      <span class="cloth-label-with-badges">
+                        Thống Nhất Màu Tóc
+                        <span class="evoto-beta-badge">Beta</span>
+                      </span>
+                      <span class="val" data-for="hairColorUnify">0</span>
+                    </div>
+                    <input type="range" class="retouch-slider hair-centered" id="hairColorUnify" min="-100" max="100" value="0" />
+                  </div>
+
+                  <div class="hair-color-section">
+                    <div class="hair-subhead" style="margin-bottom: 8px;">Màu Tóc</div>
+                    <div class="hair-color-grid" id="hair-color-grid">
+                      <button type="button" class="hair-color-card active" data-haircolor="none" title="Giữ màu tóc gốc">
+                        <span class="hair-swatch-preview hair-swatch-none">⊘</span>
+                        <span class="hair-swatch-code">Trống</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h01" data-deg="60" title="H01 - Nâu Trà Lạnh">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #988374 0%, #7C695B 55%, #4f4137 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #7C695B">H01</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h02" data-deg="60" title="H02 - Nâu Trà Sữa">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #a6745d 0%, #895C49 55%, #5b3b2e 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #895C49">H02</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h03" data-deg="60" title="H03 - Nâu Cam Tây">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #dd9269 0%, #C67951 55%, #8a4b2b 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #C67951">H03</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h04" data-deg="60" title="H04 - Đỏ Nâu Ánh Sáng">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #b86c71 0%, #9C5459 55%, #663034 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #9C5459">H04</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h05" data-deg="50" title="H05 - Đỏ Rượu">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #ca736f 0%, #AD5956 55%, #753431 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #AD5956">H05</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h06" data-deg="50" title="H06 - Nâu Hồng Phấn">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #b58d88 0%, #98726E 55%, #654744 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #98726E">H06</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h07" data-deg="70" title="H07 - Hồng Tử Đằng">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #e5b0ad 0%, #CE9390 55%, #996260 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #CE9390">H07</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h08" data-deg="50" title="H08 - Đen Tự Nhiên">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #776359 0%, #5D4B43 55%, #2f241f 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #5D4B43">H08</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h09" data-deg="60" title="H09 - Đen Ánh Xanh">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #7e849d 0%, #646980 55%, #373b4c 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #646980">H09</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h10" data-deg="60" title="H10 - Tím Nho">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #b87387 0%, #9B586C 55%, #653141 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #9B586C">H10</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h11" data-deg="60" title="H11 - Tím Khói Xanh">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #98889e 0%, #7C6D82 55%, #4d4252 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #7C6D82">H11</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h12" data-deg="60" title="H12 - Nâu Rêu Lanh">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #8d8b79 0%, #716F60 55%, #47463a 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #716F60">H12</span>
+                      </button>
+                      <button type="button" class="hair-color-card" data-haircolor="h13" data-deg="60" title="H13 - Xám Rêu Khói">
+                        <span class="hair-swatch-preview" style="background: linear-gradient(155deg, #919c7a 0%, #758060 55%, #4a523a 100%)"></span>
+                        <span class="hair-swatch-code" style="background: #758060">H13</span>
+                      </button>
+                    </div>
+                    <div id="hair-dye-controls" class="hair-dye-controls" style="margin-top: 10px;">
+                      <div class="retouch-slider-item">
+                        <div class="s-head"><span>Mức độ màu nhuộm</span><span class="val" data-for="hairDyeStrength">0</span></div>
+                        <input type="range" class="retouch-slider" id="hairDyeStrength" min="0" max="100" value="0" />
+                      </div>
+                      <div class="retouch-slider-item" style="margin-bottom: 0;">
+                        <div class="s-head"><span>Làm tối tóc</span><span class="val" data-for="hairDyeDarken">0</span></div>
+                        <input type="range" class="retouch-slider" id="hairDyeDarken" min="0" max="100" value="0" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Định hình cơ thể</div>
+                <div class="retouch-acc-body">
+                  <div class="retouch-slider-item"><div class="s-head"><span>Thon gọn vùng cổ</span><span class="val" data-for="neckSlim">0</span></div><input type="range" class="retouch-slider" id="neckSlim" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Chỉnh dáng vai</span><span class="val" data-for="shoulderSculpt">0</span></div><input type="range" class="retouch-slider" id="shoulderSculpt" min="-50" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Thu gọn eo</span><span class="val" data-for="waistSlim">0</span></div><input type="range" class="retouch-slider" id="waistSlim" min="0" max="100" value="0" /></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MODULE 3: ĐIỀU CHỈNH PHÔNG NỀN, BẦU TRỜI & TRANG PHỤC (Evoto Style) -->
+            <div id="mod-bg" class="retouch-module-pane">
+              <!-- SECTION 1: Điều chỉnh phông nền (Tối ưu hoá phông nền trơn + Tinh chỉnh) -->
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ Điều chỉnh phông nền</div>
+                <div class="retouch-acc-body">
+                  <div class="bg-subhead">Tối ưu hoá phông nền trơn</div>
+                  <div class="crop-toggle-row">
+                    <span class="crop-toggle-label">Loại bỏ chi tiết gây nhiễu</span>
+                    <button type="button" id="bgCleanDistractions" class="evoto-switch" role="switch" aria-checked="false"><span class="evoto-switch-knob"></span></button>
+                  </div>
+                  <div class="crop-toggle-row">
+                    <span class="crop-toggle-label">Loại bỏ nhược điểm phông nền</span>
+                    <button type="button" id="bgCleanDefects" class="evoto-switch" role="switch" aria-checked="false"><span class="evoto-switch-knob"></span></button>
+                  </div>
+                  <div class="crop-toggle-row">
+                    <span class="crop-toggle-label">Độ sáng đồng đều</span>
+                    <button type="button" id="bgEvenBrightness" class="evoto-switch" role="switch" aria-checked="false"><span class="evoto-switch-knob"></span></button>
+                  </div>
+                  <div class="crop-toggle-row">
+                    <span class="crop-toggle-label">Loại bỏ dải màu</span>
+                    <button type="button" id="bgRemoveBanding" class="evoto-switch" role="switch" aria-checked="false"><span class="evoto-switch-knob"></span></button>
+                  </div>
+
+                  <div class="bg-divider"></div>
+                  <div class="bg-subhead">Tinh chỉnh phông nền</div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Cải tiến phông nền</span><span class="val" data-for="backdropClean">0</span></div><input type="range" class="retouch-slider" id="backdropClean" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Khử sọc chuyển sắc (Banding)</span><span class="val" data-for="backdropBandingFix">0</span></div><input type="range" class="retouch-slider" id="backdropBandingFix" min="0" max="100" value="0" /></div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Làm mờ hậu cảnh (Bokeh)</span><span class="val" data-for="bgBlurBokeh">0</span></div><input type="range" class="retouch-slider" id="bgBlurBokeh" min="0" max="100" value="0" /></div>
+                </div>
+              </div>
+
+              <!-- SECTION 2: Thay đổi phông nền (Evoto Studio Replacement) -->
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ Thay đổi phông nền</div>
+                <div class="retouch-acc-body">
+                  <!-- LIYING AI ENGINE CARD -->
+                  <div class="liying-bg-card" id="liying-bg-card">
+                    <div class="liying-card-header">
+                      <div class="liying-badge-title">
+                        <span class="liying-sparkle" aria-hidden="true">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l2.1 6.2L20.3 10l-6.2 2.1L12 18.3l-2.1-6.2L3.7 10l6.2-1.8L12 2zm7 12l1.1 3.1L23.2 18l-3.1 1.1L19 22.2l-1.1-3.1L14.8 18l3.1-.9L19 14z"/>
+                          </svg>
+                        </span>
+                        <div class="liying-title-stack">
+                          <strong>LiYing AI</strong>
+                          <span class="liying-subtitle">RMBG + Pose</span>
+                        </div>
+                      </div>
+                      <span class="liying-tag">Local</span>
+                    </div>
+
+                    <label class="liying-checkbox-label" title="Tự động nhận diện hai vai bằng YOLOv8 Pose, xoay cân bằng tư thế và căn giữa mặt">
+                      <span class="liying-option-text">Tự cân bằng vai khi tách nền</span>
+                      <input type="checkbox" id="liying-straighten-cb" />
+                    </label>
+
+                    <div class="liying-preset-grid">
+                      <button type="button" class="liying-color-chip active" data-color="blue" title="Xanh thẻ chuẩn LiYing (#628BCE)">
+                        <span class="chip-dot" style="background:#628bce"></span>
+                        <span>Xanh thẻ</span>
+                      </button>
+                      <button type="button" class="liying-color-chip" data-color="white" title="Trắng chuẩn LiYing (#FFFFFF)">
+                        <span class="chip-dot chip-dot-light" style="background:#ffffff"></span>
+                        <span>Trắng</span>
+                      </button>
+                      <button type="button" class="liying-color-chip" data-color="red" title="Đỏ ảnh thẻ (#D74532)">
+                        <span class="chip-dot" style="background:#d74532"></span>
+                        <span>Đỏ</span>
+                      </button>
+                      <button type="button" class="liying-color-chip" data-color="transparent" title="Trong suốt (PNG Alpha)">
+                        <span class="chip-dot chip-transparent"></span>
+                        <span>Trong suốt</span>
+                      </button>
+                      <button type="button" class="liying-color-chip" data-color="dark_blue" title="Xanh đậm công sở (#0047AB)">
+                        <span class="chip-dot" style="background:#0047ab"></span>
+                        <span>Xanh đậm</span>
+                      </button>
+                      <button type="button" class="liying-color-chip" data-color="light_blue" title="Xanh nhạt dịu (#B4C8E6)">
+                        <span class="chip-dot" style="background:#b4c8e6"></span>
+                        <span>Xanh nhạt</span>
+                      </button>
+                      <button type="button" class="liying-color-chip" data-color="gray" title="Xám trung tính (#808080)">
+                        <span class="chip-dot" style="background:#808080"></span>
+                        <span>Xám</span>
+                      </button>
+                      <button type="button" class="liying-color-chip" data-color="beige" title="Kem ấm (#F5F5DC)">
+                        <span class="chip-dot chip-dot-light" style="background:#f5f5dc"></span>
+                        <span>Kem Be</span>
+                      </button>
+                    </div>
+
+                    <div class="liying-actions-row">
+                      <button type="button" id="btn-liying-apply" class="btn-liying-primary" title="Chạy tách & thay nền bằng thuật toán LiYing AI">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+                        <span>Tách &amp; Thay nền</span>
+                      </button>
+                      <button type="button" id="btn-liying-level-only" class="btn-liying-secondary" title="Chỉ cân bằng vai & canh giữa mặt (giữ nguyên nền)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"/><path d="M8 7l-3 5 3 5"/><path d="M16 7l3 5-3 5"/></svg>
+                        <span>Cân vai</span>
+                      </button>
+                      <button type="button" id="btn-liying-cancel" class="btn-liying-secondary btn-liying-cancel" title="Hủy xử lý hoặc khôi phục lại ảnh trước khi tách & thay nền">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                        <span>Hủy</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Hình ảnh / Màu đơn sắc Segmented Tabs -->
+                  <div class="bg-type-tabs">
+                    <button type="button" class="bg-type-tab active" id="bg-cat-image">Hình ảnh</button>
+                    <button type="button" class="bg-type-tab" id="bg-cat-solid">Màu đơn sắc</button>
+                  </div>
+
+                  <!-- Đề xuất / Nền của bạn Underline Tabs + Reset Original -->
+                  <div class="bg-lib-tabs-row">
+                    <div class="bg-lib-tabs">
+                      <button type="button" class="bg-lib-tab active" id="bg-lib-tab-rec">Đề xuất</button>
+                      <button type="button" class="bg-lib-tab" id="bg-lib-tab-user">Nền của bạn</button>
+                    </div>
+                    <button type="button" id="btn-bg-reset-original" class="bg-orig-reset-btn" title="Khôi phục phông nền gốc">Nền gốc</button>
+                  </div>
+
+                  <!-- Synced Dropdown (Ẩn nhẹ trong UI nhưng tương thích hoàn toàn preset & phím tắt) -->
+                  <select id="bgReplaceMode" class="retouch-select bg-compact-select" aria-label="Chế độ phông nền">
+                    <option value="original">Giữ nguyên phông nền gốc</option>
+                    <option value="transparent">Nền Trong suốt (PNG Alpha)</option>
+                    <option value="pure_white">Trắng (Studio Photo / Ảnh thẻ)</option>
+                    <option value="studio_grey">Xám 02 (Studio trung tính)</option>
+                    <option value="moody_black">Đen (Low-Key Studio)</option>
+                    <option value="fabric_02">Vải 02 (Phông vải vân mây)</option>
+                    <option value="warm_beige">Nâu 03 (Be / Nâu tạp chí)</option>
+                    <option value="slate_grey_03">Xám 03 (Xám khói Studio)</option>
+                    <option value="passport_blue">Xanh thẻ (Xanh dương Studio)</option>
+                    <option value="pastel_pink">Hồng phấn (Pastel Studio)</option>
+                    <option value="sage_green">Xanh bơ (Mint Pastel)</option>
+                    <option value="lavender_mist">Tím nhạt (Lavender Studio)</option>
+                    <option value="sky_golden_sunset">Bầu trời: Hoàng hôn vàng</option>
+                    <option value="sky_alpine_blue">Bầu trời: Xanh mây núi</option>
+                    <option value="sky_dramatic_clouds">Bầu trời: Mây kịch tính</option>
+                    <option value="sky_night_stars">Bầu trời: Đêm đầy sao</option>
+                    <option value="custom_color">Màu đơn sắc tùy chỉnh</option>
+                    <option value="custom_image">Ảnh phông nền của bạn</option>
+                  </select>
+
+                  <!-- TAB ĐỀ XUẤT -->
+                  <div id="bg-lib-rec-panel">
+                    <div class="bg-filter-pills">
+                      <button type="button" class="bg-pill active" id="bg-filter-explore">Khám phá ngay</button>
+                      <button type="button" class="bg-pill" id="bg-filter-selected">Mục đã chọn</button>
+                    </div>
+
+                    <div class="asset-hub-grid bg-evoto-grid" id="bg-asset-hub-grid">
+                      <button type="button" class="asset-swatch bg-swatch-transparent" data-bgmode="transparent"><span>Trong suốt</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="pure_white" style="background: #f8fafc; color: #09090b"><span>Trắng</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="studio_grey" style="background: radial-gradient(circle at 50% 35%, #b5b9c0, #6f737a)"><span>Xám 02</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="moody_black" style="background: radial-gradient(circle at 50% 35%, #2b2e36, #0a0b0d)"><span>Đen</span></button>
+
+                      <button type="button" class="asset-swatch" data-bgmode="fabric_02" style="background: radial-gradient(circle at 38% 42%, #555c68, #282c33 60%, #1c1f25)"><span>Vải 02</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="warm_beige" style="background: radial-gradient(circle at 50% 38%, #ad9387, #8a7368)"><span>Nâu 03</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="slate_grey_03" style="background: linear-gradient(160deg, #74727a, #5c5a63)"><span>Xám 03</span></button>
+                      <button type="button" class="asset-swatch bg-swatch-more" id="btn-bg-more"><span>Thêm</span></button>
+                    </div>
+
+                    <div class="asset-hub-grid bg-evoto-grid hidden" id="bg-more-swatches" style="margin-top: 6px;">
+                      <button type="button" class="asset-swatch active" data-bgmode="original" style="background: linear-gradient(135deg, #18181c, #2d2d35)"><span>Nền gốc</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="passport_blue" style="background: #2563eb"><span>Xanh thẻ</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="pastel_pink" style="background: #f3cbd3; color: #18181b"><span>Hồng phấn</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="sage_green" style="background: #9bb7a5; color: #18181b"><span>Xanh bơ</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="lavender_mist" style="background: #cdc4ea; color: #18181b"><span>Tím nhạt</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="custom_color" id="swatch-custom-color" style="background: #e8eef5; color: #09090b"><span>Màu riêng</span></button>
+                      <button type="button" class="asset-swatch" data-bgmode="custom_image" style="background: linear-gradient(135deg, #27272f, #3f3f4a)"><span>Ảnh riêng</span></button>
+                    </div>
+                  </div>
+
+                  <!-- TAB NỀN CỦA BẠN (Hình ảnh upload & Màu đơn sắc) -->
+                  <div id="bg-lib-user-panel" class="hidden">
+                    <div id="bg-user-image-pane">
+                      <div class="bg-filter-pills">
+                        <button type="button" class="bg-pill active" id="bg-user-filter-personal">Cá nhân</button>
+                        <button type="button" class="bg-pill" id="bg-user-filter-fav">Yêu thích của tôi</button>
+                      </div>
+                      <button type="button" id="btn-upload-custom-bg" class="bg-upload-dropzone">
+                        <span class="bg-upload-plus">+</span>
+                        <span class="bg-upload-hint">Chọn ảnh nền từ máy (JPEG, PNG, WEBP)</span>
+                      </button>
+                      <input type="file" id="bg-custom-file-input" accept="image/*" multiple hidden />
+                      <div id="bg-user-gallery" class="bg-user-gallery hidden"></div>
+                      <div id="custom-bg-preview" class="custom-bg-preview hidden" style="margin-top: 6px;">
+                        <img id="custom-bg-preview-img" alt="Xem trước ảnh nền" />
+                        <button type="button" id="btn-clear-custom-bg" class="custom-bg-clear-btn hidden" title="Xóa ảnh nền đang chọn">✕</button>
+                      </div>
+                    </div>
+
+                    <div id="bg-user-solid-pane" class="hidden">
+                      <div class="bg-solid-picker-banner">
+                        <label class="bg-rainbow-chip" title="Chọn màu tùy chỉnh">
+                          <input type="color" id="bgCustomColor" value="#e8eef5" />
+                        </label>
+                        <div class="bg-solid-text">
+                          <div>Hãy thêm màu tùy chỉnh từ bảng chọn màu.</div>
+                          <span id="bg-custom-color-hex" class="bg-color-hex">#e8eef5</span>
+                        </div>
+                      </div>
+                      <div class="bg-solid-presets">
+                        <button type="button" class="bg-color-dot" data-color="#ffffff" style="background: #ffffff" title="Trắng"></button>
+                        <button type="button" class="bg-color-dot" data-color="#e8eef5" style="background: #e8eef5" title="Xanh xám nhạt"></button>
+                        <button type="button" class="bg-color-dot" data-color="#cbd5e1" style="background: #cbd5e1" title="Xám sáng"></button>
+                        <button type="button" class="bg-color-dot" data-color="#94a3b8" style="background: #94a3b8" title="Xám studio"></button>
+                        <button type="button" class="bg-color-dot" data-color="#2563eb" style="background: #2563eb" title="Xanh thẻ"></button>
+                        <button type="button" class="bg-color-dot" data-color="#b91c1c" style="background: #b91c1c" title="Đỏ đô"></button>
+                        <button type="button" class="bg-color-dot" data-color="#e7d8c5" style="background: #e7d8c5" title="Kem ấm"></button>
+                        <button type="button" class="bg-color-dot" data-color="#18181b" style="background: #18181b" title="Đen than"></button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- KHÓA ĐIỀU KHIỂN KHI CHƯA THAY NỀN + BỘ TINH CHỈNH CHI TIẾT EVOTO -->
+                  <div id="bg-replace-advanced-wrap" class="bg-advanced-wrap is-locked">
+                    <div id="bg-lock-banner" class="bg-lock-banner">Thay đổi nền để mở khoá các điều khiển này.</div>
+                    <div id="bg-replace-controls-body" class="bg-controls-body">
+                      <div class="bg-field-group">
+                        <label class="bg-field-label">Chế độ viền <span class="evoto-new-badge">New</span></label>
+                        <select id="bgEdgeMode" class="retouch-select bg-evoto-select">
+                          <option value="auto">Tự động</option>
+                          <option value="soft">Mềm (Tóc bay)</option>
+                          <option value="crisp">Sắc nét</option>
+                          <option value="hair_detail">Tóc chi tiết</option>
+                        </select>
+                      </div>
+
+                      <div class="bg-field-group">
+                        <label class="bg-field-label">Phạm vi lưu giữ</label>
+                        <select id="bgKeepScope" class="retouch-select bg-evoto-select">
+                          <option value="subject_and_related">Chủ thể và các đối tượng liên quan</option>
+                          <option value="subject_only">Chỉ chủ thể chính</option>
+                          <option value="portrait_focus">Chân dung (Đầu &amp; vai)</option>
+                        </select>
+                      </div>
+
+                      <div class="bg-field-group">
+                        <label class="bg-field-label">Vùng lấp đầy</label>
+                        <select id="bgFillArea" class="retouch-select bg-evoto-select">
+                          <option value="full_image">Ảnh gốc</option>
+                          <option value="outer_only">Chỉ vùng nền trống</option>
+                        </select>
+                      </div>
+
+                      <div class="bg-field-group">
+                        <label class="bg-field-label">Chế độ lấp đầy</label>
+                        <select id="bgFillMode" class="retouch-select bg-evoto-select">
+                          <option value="cover">Phủ kín (Giữ tỉ lệ)</option>
+                          <option value="stretch">Kéo giãn để lấp đầy</option>
+                          <option value="contain">Vừa khung ảnh</option>
+                          <option value="tile">Lặp gạch nền</option>
+                        </select>
+                      </div>
+
+                      <div class="bg-field-group">
+                        <label class="bg-field-label">Chế độ hòa trộn</label>
+                        <select id="bgBlendMode" class="retouch-select bg-evoto-select">
+                          <option value="normal">Bình thường</option>
+                          <option value="multiply">Nhân</option>
+                          <option value="screen">Làm sáng</option>
+                          <option value="overlay">Phủ</option>
+                          <option value="soft_light">Ánh sáng mềm</option>
+                        </select>
+                      </div>
+
+                      <div class="retouch-slider-item"><div class="s-head"><span>Điều chỉnh viền</span><span class="val" data-for="bgEdgeAdjust">0</span></div><input type="range" class="retouch-slider" id="bgEdgeAdjust" min="-100" max="100" value="0" /></div>
+                      <div class="retouch-slider-item"><div class="s-head"><span>Độ mờ</span><span class="val" data-for="bgReplaceOpacity">100</span></div><input type="range" class="retouch-slider" id="bgReplaceOpacity" min="0" max="100" value="100" /></div>
+                      <div class="retouch-slider-item"><div class="s-head"><span>Kích thước</span><span class="val" data-for="bgScale">0</span></div><input type="range" class="retouch-slider" id="bgScale" min="0" max="100" value="0" /></div>
+                      <div class="retouch-slider-item"><div class="s-head"><span>Chiều dọc</span><span class="val" data-for="bgOffsetY">0</span></div><input type="range" class="retouch-slider" id="bgOffsetY" min="-100" max="100" value="0" /></div>
+                      <div class="retouch-slider-item"><div class="s-head"><span>Chiều ngang</span><span class="val" data-for="bgOffsetX">0</span></div><input type="range" class="retouch-slider" id="bgOffsetX" min="-100" max="100" value="0" /></div>
+                      <div class="retouch-slider-item"><div class="s-head"><span>Mờ</span><span class="val" data-for="bgBlurStrength">0</span></div><input type="range" class="retouch-slider" id="bgBlurStrength" min="0" max="100" value="0" /></div>
+
+                      <div class="crop-toggle-row">
+                        <span class="crop-toggle-label">Xoá lem màu</span>
+                        <button type="button" id="bgDecontam" class="evoto-switch" role="switch" aria-checked="false"><span class="evoto-switch-knob"></span></button>
+                      </div>
+                      <div class="crop-toggle-row">
+                        <span class="crop-toggle-label">Phản chiếu mặt đất</span>
+                        <button type="button" id="bgGroundReflect" class="evoto-switch" role="switch" aria-checked="false"><span class="evoto-switch-knob"></span></button>
+                      </div>
+
+                      <div class="bg-divider"></div>
+                      <div class="bg-subhead">Bóng Gốc</div>
+                      <div class="crop-toggle-row">
+                        <span class="crop-toggle-label">Bóng AI giữ lại</span>
+                        <button type="button" id="bgPreserveShadow" class="evoto-switch" role="switch" aria-checked="false"><span class="evoto-switch-knob"></span></button>
+                      </div>
+
+                      <div class="bg-subhead" style="margin-top: 8px;">Thêm bóng đổ</div>
+                      <div class="bg-shadow-grid" id="bg-shadow-grid">
+                        <button type="button" class="bg-shadow-card active" data-shadow="none">
+                          <span class="bg-sh-icon bg-sh-none">⊘</span>
+                          <span>Trống</span>
+                        </button>
+                        <button type="button" class="bg-shadow-card" data-shadow="soft_shadow">
+                          <span class="bg-sh-icon bg-sh-soft">●</span>
+                          <span>Bóng mờ</span>
+                        </button>
+                        <button type="button" class="bg-shadow-card" data-shadow="hard_shadow">
+                          <span class="bg-sh-icon bg-sh-hard">●</span>
+                          <span>Bóng đậm</span>
+                        </button>
+                        <button type="button" class="bg-shadow-card" data-shadow="cast_shadow">
+                          <span class="bg-sh-icon bg-sh-cast">●</span>
+                          <span>Đổ bóng</span>
+                        </button>
+                      </div>
+
+                      <div class="retouch-slider-item"><div class="s-head"><span>Làm mờ bóng</span><span class="val" data-for="bgShadowBlur">25</span></div><input type="range" class="retouch-slider" id="bgShadowBlur" min="0" max="100" value="25" /></div>
+                      <div class="retouch-slider-item"><div class="s-head"><span>Độ mờ</span><span class="val" data-for="bgShadowOpacity">0</span></div><input type="range" class="retouch-slider" id="bgShadowOpacity" min="0" max="100" value="0" /></div>
+                      <div class="retouch-slider-item"><div class="s-head"><span>Chuyển màu</span><span class="val" data-for="bgShadowShift">0</span></div><input type="range" class="retouch-slider" id="bgShadowShift" min="0" max="100" value="0" /></div>
+
+                      <div class="bg-field-group">
+                        <label class="bg-field-label">Chế độ hòa trộn</label>
+                        <select id="bgShadowBlendMode" class="retouch-select bg-evoto-select">
+                          <option value="multiply">Nhân</option>
+                          <option value="normal">Bình thường</option>
+                          <option value="darken">Làm tối</option>
+                          <option value="soft_light">Ánh sáng mềm</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 3: Đổi bầu trời -->
+              <div class="retouch-acc-group collapsed">
+                <div class="retouch-acc-title">▾ Đổi bầu trời</div>
+                <div class="retouch-acc-body">
+                  <div class="asset-hub-grid bg-evoto-grid" style="margin-bottom: 8px;">
+                    <button type="button" class="asset-swatch" data-bgmode="sky_golden_sunset" style="background: linear-gradient(180deg, #f97316, #fde047)"><span>Hoàng hôn</span></button>
+                    <button type="button" class="asset-swatch" data-bgmode="sky_alpine_blue" style="background: linear-gradient(180deg, #1d4ed8, #93c5fd)"><span>Trời xanh</span></button>
+                    <button type="button" class="asset-swatch" data-bgmode="sky_dramatic_clouds" style="background: linear-gradient(180deg, #334155, #94a3b8)"><span>Mây bão</span></button>
+                    <button type="button" class="asset-swatch" data-bgmode="sky_night_stars" style="background: linear-gradient(180deg, #090d16, #1e293b)"><span>Đêm sao</span></button>
+                  </div>
+                  <div class="retouch-slider-item"><div class="s-head"><span>Tăng chiều sâu &amp; sắc trời</span><span class="val" data-for="skyEnhance">0</span></div><input type="range" class="retouch-slider" id="skyEnhance" min="0" max="100" value="0" /></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MODULE 3B: LÀM ĐẸP TRANG PHỤC (Evoto Style) -->
+            <div id="mod-clothing" class="retouch-module-pane">
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title cloth-acc-title">
+                  <span>▾ Điều chỉnh trang phục</span>
+                  <button type="button" id="btn-clothing-reset" class="cloth-reset-btn" title="Đặt lại toàn bộ chỉnh sửa trang phục">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                      <path d="M3 3v5h5" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="retouch-acc-body">
+                  <!-- Nhóm đối tượng trang phục -->
+                  <div class="cloth-target-pills" id="cloth-target-pills">
+                    <button type="button" class="cloth-target-pill active" data-clothtarget="all">Tất cả</button>
+                    <button type="button" class="cloth-target-pill" data-clothtarget="female">Nữ</button>
+                    <button type="button" class="cloth-target-pill" data-clothtarget="male">Nam</button>
+                    <button type="button" class="cloth-target-pill" data-clothtarget="child">Trẻ con</button>
+                    <button type="button" class="cloth-target-pill" data-clothtarget="senior_female">Nữ lớn tuổi</button>
+                    <button type="button" class="cloth-target-pill" data-clothtarget="senior_male">Nam lớn tuổi</button>
+                  </div>
+
+                  <!-- Card Loại bỏ nếp nhăn quần áo -->
+                  <div class="cloth-wrinkle-card">
+                    <div class="cloth-wrinkle-head">
+                      <div class="cloth-wrinkle-title">
+                        <span>Loại bỏ nếp nhăn quần áo</span>
+                        <span class="evoto-new-badge">New</span>
+                      </div>
+                      <button type="button" id="btn-cloth-wrinkle-link" class="cloth-link-btn active" aria-pressed="true" title="Liên kết mức độ nếp nhăn nhỏ &amp; nếp nhăn lớn">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M9 17H7A5 5 0 0 1 7 7h2" />
+                          <path d="M15 7h2a5 5 0 1 1 0 10h-2" />
+                          <line x1="8" y1="12" x2="16" y2="12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="retouch-slider-item" style="margin-bottom: 0;">
+                      <div class="s-head"><span>Mức độ</span><span class="val" data-for="clothingDewrinkle">0</span></div>
+                      <input type="range" class="retouch-slider" id="clothingDewrinkle" min="0" max="100" value="0" />
+                    </div>
+                  </div>
+
+                  <div class="retouch-slider-item" style="margin-top: 10px;">
+                    <div class="s-head"><span>Loại bỏ nếp nhăn nhỏ</span><span class="val" data-for="clothingSmallWrinkles">100</span></div>
+                    <input type="range" class="retouch-slider" id="clothingSmallWrinkles" min="0" max="100" value="100" />
+                  </div>
+                  <div class="retouch-slider-item">
+                    <div class="s-head"><span>Loại bỏ nếp nhăn lớn</span><span class="val" data-for="clothingLargeWrinkles">100</span></div>
+                    <input type="range" class="retouch-slider" id="clothingLargeWrinkles" min="0" max="100" value="100" />
+                  </div>
+
+                  <div class="bg-divider" style="margin-top: 10px;"></div>
+                  <div class="cloth-subhead">Xoá khuyết điểm trên quần áo</div>
+
+                  <div class="retouch-slider-item">
+                    <div class="s-head">
+                      <span class="cloth-label-with-badges">
+                        Xóa xơ vải
+                        <span class="cloth-help-dot" title="Tự động nhận diện và xóa xơ vải, bụi trắng li ti trên trang phục">?</span>
+                        <span class="evoto-beta-badge">Beta</span>
+                      </span>
+                      <span class="val" data-for="clothingLintClean">0</span>
+                    </div>
+                    <input type="range" class="retouch-slider" id="clothingLintClean" min="0" max="100" value="0" />
+                  </div>
+
+                  <div class="retouch-slider-item">
+                    <div class="s-head">
+                      <span class="cloth-label-with-badges">
+                        Xóa vết mồ hôi
+                        <span class="evoto-beta-badge">Beta</span>
+                        <span class="evoto-new-badge">New</span>
+                      </span>
+                      <span class="cloth-val-with-arrow">
+                        <span class="val" data-for="clothingSweatStain">0</span>
+                        <button type="button" id="btn-cloth-sweat-expand" class="cloth-sub-arrow" aria-expanded="false" title="Mở tinh chỉnh vết mồ hôi">▸</button>
+                      </span>
+                    </div>
+                    <input type="range" class="retouch-slider" id="clothingSweatStain" min="0" max="100" value="0" />
+                    <div id="cloth-sweat-drawer" class="cloth-sub-drawer hidden">
+                      <div class="s-head" style="margin-top: 6px;"><span>Đều màu vùng ẩm</span><span class="val" data-for="clothingSweatEvenness">50</span></div>
+                      <input type="range" class="retouch-slider" id="clothingSweatEvenness" min="0" max="100" value="50" />
+                    </div>
+                  </div>
+
+                  <div class="retouch-slider-item">
+                    <div class="s-head">
+                      <span class="cloth-label-with-badges">
+                        Làm phẳng viền trang phục
+                        <span class="cloth-help-dot" title="Làm phẳng đường gấu áo, cổ áo, mép vải bị phồng hoặc nhăn nhúm">?</span>
+                      </span>
+                      <span class="cloth-val-with-arrow">
+                        <span class="val" data-for="clothingEdgeSmooth">0</span>
+                        <button type="button" id="btn-cloth-edge-expand" class="cloth-sub-arrow" aria-expanded="false" title="Mở tinh chỉnh viền trang phục">▸</button>
+                      </span>
+                    </div>
+                    <input type="range" class="retouch-slider" id="clothingEdgeSmooth" min="0" max="100" value="0" />
+                    <div id="cloth-edge-drawer" class="cloth-sub-drawer hidden">
+                      <div class="s-head" style="margin-top: 6px;"><span>Bảo vệ cổ &amp; gấu áo</span><span class="val" data-for="clothingEdgeRefine">50</span></div>
+                      <input type="range" class="retouch-slider" id="clothingEdgeRefine" min="0" max="100" value="50" />
+                    </div>
+                  </div>
+
+                  <!-- Promo card: Loại bỏ vân vải (Moiré) -->
+                  <div class="cloth-promo-card">
+                    <div class="cloth-promo-thumb">
+                      <div class="cloth-promo-half cloth-promo-before">
+                        <span class="cloth-ba-tag">Before</span>
+                      </div>
+                      <div class="cloth-promo-half cloth-promo-after">
+                        <span class="cloth-ba-tag after">After</span>
+                      </div>
+                    </div>
+                    <div class="cloth-promo-info">
+                      <div class="cloth-promo-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                          <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
+                        </svg>
+                      </div>
+                      <div class="cloth-promo-title">Loại bỏ vân vải</div>
+                      <button type="button" id="btn-cloth-try-moire" class="cloth-promo-cta">Dùng thử ngay →</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2: AI Lab -->
+              <div class="retouch-acc-group">
+                <div class="retouch-acc-title">▾ AI Lab</div>
+                <div class="retouch-acc-body">
+                  <button type="button" id="btn-cloth-ailab-moire" class="cloth-ailab-row" aria-expanded="false">
+                    <span class="cloth-ailab-left">
+                      <span class="cloth-ailab-badge">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                          <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
+                        </svg>
+                      </span>
+                      <span>Loại bỏ vân vải</span>
+                    </span>
+                    <span class="cloth-ailab-chevron" id="cloth-ailab-chevron">›</span>
+                  </button>
+                  <div id="cloth-ailab-moire-drawer" class="cloth-ailab-drawer hidden">
+                    <div class="retouch-slider-item" style="margin-bottom: 0;">
+                      <div class="s-head"><span>Khử vân Moiré trên vải</span><span class="val" data-for="clothingMoireRemove">0</span></div>
+                      <input type="range" class="retouch-slider" id="clothingMoireRemove" min="0" max="100" value="0" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MODULE 4: CẮT & XOAY (Evoto Style) -->
+            <div id="mod-crop" class="retouch-module-pane">
+              <div class="crop-mode-tabs">
+                <button type="button" class="crop-mode-tab active" data-croptab="crop-pane-main">Cắt &amp; Xoay</button>
+                <button type="button" class="crop-mode-tab" data-croptab="crop-pane-expand">Phối cảnh &amp; Mở rộng</button>
+              </div>
+
+              <!-- TAB 1: CẮT & XOAY -->
+              <div id="crop-pane-main" class="crop-subtab-pane active">
+                <div class="retouch-acc-group">
+                  <div class="retouch-acc-title">▾ Cắt</div>
+                  <div class="retouch-acc-body">
+
+                    <!-- Evoto Crop Ratio Dropdown -->
+                    <div class="crop-ratio-wrap">
+                      <button type="button" id="crop-ratio-btn" class="crop-ratio-btn" aria-expanded="false">
+                        <span id="crop-ratio-label">Kích thước gốc</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                      </button>
+                      <div id="crop-ratio-menu" class="crop-ratio-menu hidden">
+                        <div class="crop-ratio-opt active" data-preset="original" data-aw="0" data-ah="0"><span class="opt-check">✓</span><span>Kích thước gốc</span></div>
+                        <div class="crop-ratio-opt" data-preset="as_shot" data-aw="-3" data-ah="-3"><span class="opt-check"></span><span>Cài đặt ảnh gốc</span></div>
+                        <div class="crop-ratio-opt" data-preset="fixed" data-aw="-1" data-ah="-1"><span class="opt-check"></span><span>Tỉ lệ cố định</span></div>
+                        <div class="crop-ratio-opt" data-preset="custom_ratio" data-aw="-2" data-ah="-2"><span class="opt-check"></span><span>Kích thước tự chọn</span></div>
+                        <div class="crop-ratio-divider"></div>
+                        <div class="crop-ratio-opt" data-preset="1:1" data-aw="1" data-ah="1"><span class="opt-check"></span><span>1 : 1</span></div>
+                        <div class="crop-ratio-opt" data-preset="4:5" data-aw="4" data-ah="5"><span class="opt-check"></span><span>4 : 5</span></div>
+                        <div class="crop-ratio-opt" data-preset="5:7" data-aw="5" data-ah="7"><span class="opt-check"></span><span>5 : 7</span></div>
+                        <div class="crop-ratio-opt" data-preset="2:3" data-aw="2" data-ah="3"><span class="opt-check"></span><span>2 : 3</span></div>
+                        <div class="crop-ratio-opt" data-preset="16:9" data-aw="16" data-ah="9"><span class="opt-check"></span><span>16 : 9</span></div>
+                        <div class="crop-ratio-opt" data-preset="1.91:1" data-aw="191" data-ah="100"><span class="opt-check"></span><span>1.91 : 1</span></div>
+                        <div class="crop-ratio-opt" data-preset="2:1" data-aw="2" data-ah="1"><span class="opt-check"></span><span>2 : 1</span></div>
+                        <div class="crop-ratio-opt" data-preset="3:1" data-aw="3" data-ah="1"><span class="opt-check"></span><span>3 : 1</span></div>
+                        <div class="crop-ratio-opt" data-preset="4:3" data-aw="4" data-ah="3"><span class="opt-check"></span><span>4 : 3</span></div>
+                        <div class="crop-ratio-divider"></div>
+                        <div class="crop-ratio-opt" data-preset="custom_dim" data-aw="-4" data-ah="-4"><span class="opt-check"></span><span>Dài*Rộng*Độ phân giải</span></div>
+                        <div class="crop-ratio-opt" data-preset="id_photo" data-aw="-5" data-ah="-5"><span class="opt-check"></span><span>Ảnh Thẻ</span><span class="opt-arrow">›</span></div>
+                      </div>
+                    </div>
+
+                    <!-- Nhập tay tỉ lệ W : H -->
+                    <div id="crop-custom-ratio-box" class="crop-custom-inputs hidden">
+                      <div class="crop-dim-grid">
+                        <div class="crop-dim-field">
+                          <label>Tỉ lệ ngang</label>
+                          <input type="number" id="crop-ratio-w-in" class="crop-num-input" min="0.1" max="9999" step="0.1" value="4" />
+                        </div>
+                        <button type="button" id="btn-crop-swap-ratio" class="crop-swap-btn" title="Đảo tỉ lệ ngang / dọc">⇄</button>
+                        <div class="crop-dim-field">
+                          <label>Tỉ lệ dọc</label>
+                          <input type="number" id="crop-ratio-h-in" class="crop-num-input" min="0.1" max="9999" step="0.1" value="5" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Nhập tay Dài * Rộng * Độ phân giải -->
+                    <div id="crop-custom-inputs" class="crop-custom-inputs hidden">
+                      <div class="crop-dim-grid">
+                        <div class="crop-dim-field">
+                          <label>Rộng</label>
+                          <input type="number" id="crop-custom-w-in" class="crop-num-input" min="1" max="20000" step="1" placeholder="1200" />
+                        </div>
+                        <button type="button" id="btn-crop-swap-dim" class="crop-swap-btn" title="Đảo Rộng × Cao">⇄</button>
+                        <div class="crop-dim-field">
+                          <label>Cao</label>
+                          <input type="number" id="crop-custom-h-in" class="crop-num-input" min="1" max="20000" step="1" placeholder="1500" />
+                        </div>
+                      </div>
+                      <div class="crop-dim-meta-row">
+                        <select id="crop-dim-unit" class="crop-mini-select">
+                          <option value="px">px (Pixel)</option>
+                          <option value="cm">cm</option>
+                          <option value="mm">mm</option>
+                        </select>
+                        <div class="crop-dpi-field">
+                          <span>DPI</span>
+                          <input type="number" id="crop-dpi-in" class="crop-num-input" min="72" max="1200" step="1" value="300" />
+                        </div>
+                      </div>
+                      <p id="crop-dim-computed" class="crop-custom-hint">Áp dụng đúng tỉ lệ &amp; xuất đúng kích thước</p>
+                    </div>
+
+                    <!-- Preset Ảnh Thẻ -->
+                    <div id="crop-id-presets-box" class="crop-custom-inputs hidden">
+                      <div class="crop-id-grid">
+                        <button type="button" class="crop-id-chip" data-idpreset="id_2x3" data-cmw="2" data-cmh="3">2×3 cm</button>
+                        <button type="button" class="crop-id-chip" data-idpreset="id_3x4" data-cmw="3" data-cmh="4">3×4 cm</button>
+                        <button type="button" class="crop-id-chip" data-idpreset="id_4x6" data-cmw="4" data-cmh="6">4×6 cm</button>
+                        <button type="button" class="crop-id-chip" data-idpreset="id_35x45" data-cmw="3.5" data-cmh="4.5">Visa 3.5×4.5</button>
+                        <button type="button" class="crop-id-chip" data-idpreset="id_5x5" data-cmw="5" data-cmh="5">5×5 cm</button>
+                        <button type="button" class="crop-id-chip" data-idpreset="id_33x48" data-cmw="3.3" data-cmh="4.8">3.3×4.8 cm</button>
+                      </div>
+                      <p id="crop-id-readout" class="crop-custom-hint">300 DPI · Tự động khóa đúng tỉ lệ ảnh thẻ</p>
+                    </div>
+
+                    <!-- Live Readout + Action Buttons -->
+                    <div class="crop-toolbar-row">
+                      <span id="crop-box-readout" class="crop-box-readout">Toàn khung ảnh</span>
+                      <div class="crop-mini-actions">
+                        <button type="button" id="btn-crop-orient" class="crop-mini-btn" title="Đảo chiều khung cắt (Ngang / Dọc)">⇄</button>
+                        <button type="button" id="btn-crop-preview-toggle" class="crop-mini-btn" title="Xem kết quả đã cắt ngay">Xem</button>
+                        <button type="button" id="btn-crop-reset" class="crop-mini-btn" title="Đặt lại khung cắt">↺</button>
+                      </div>
+                    </div>
+
+                    <div class="crop-apply-reset-row">
+                      <button type="button" id="btn-crop-apply" class="crop-action-btn primary" title="Áp dụng vùng cắt vào khung xem trước">Áp dụng cắt</button>
+                      <button type="button" id="btn-crop-reset-btn" class="crop-action-btn secondary" title="Khôi phục khung ảnh gốc">Đặt lại cắt</button>
+                    </div>
+
+                    <!-- Show Grid -->
+                    <label class="crop-check-row">
+                      <input type="checkbox" id="crop-show-grid" checked />
+                      <span>Hiển thị lưới khi cắt ảnh</span>
+                    </label>
+
+                    <!-- Định vị bằng AI -->
+                    <div class="crop-ai-section">
+                      <div class="crop-ai-title">Định vị bằng AI</div>
+                      <div class="crop-ai-tabs">
+                        <button type="button" class="crop-ai-tab active" id="crop-ai-tab-subject">Chủ thể</button>
+                        <button type="button" class="crop-ai-tab" id="crop-ai-tab-head">Khung chân dung</button>
+                      </div>
+
+                      <div id="crop-ai-subject-panel">
+                        <div class="crop-toggle-row">
+                          <span class="crop-toggle-label">Định vị đối tượng</span>
+                          <button type="button" id="toggle-crop-ai-subject" class="evoto-switch" role="switch" aria-checked="false">
+                            <span class="evoto-switch-knob"></span>
+                          </button>
+                        </div>
+                        <div class="crop-sublabel">Tự động căn chỉnh người</div>
+                        <div class="crop-ai-stack-btns">
+                          <button type="button" id="btn-crop-align-v" class="crop-pill-action-btn">Căn chỉnh dọc</button>
+                          <button type="button" id="btn-crop-align-eye" class="crop-pill-action-btn">Căn ngang theo mắt</button>
+                        </div>
+                      </div>
+
+                      <div id="crop-ai-head-panel" class="hidden">
+                        <div class="crop-sublabel" style="margin-top:8px">Bố cục chân dung AI 478 điểm</div>
+                        <div class="crop-id-grid">
+                          <button type="button" class="crop-frame-chip" data-frame="headshot">Cận mặt</button>
+                          <button type="button" class="crop-frame-chip" data-frame="waist">Bán thân</button>
+                          <button type="button" class="crop-frame-chip" data-frame="full">Toàn thân</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- XOAY -->
+                <div class="retouch-acc-group">
+                  <div class="retouch-acc-title">▾ Xoay</div>
+                  <div class="retouch-acc-body">
+                    <div class="crop-rotate-icons">
+                      <button type="button" id="btn-crop-rot-left" class="crop-icon-btn" title="Xoay trái 90°">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><rect x="9" y="9" width="8" height="8" rx="1.2"/></svg>
+                      </button>
+                      <button type="button" id="btn-crop-rot-right" class="crop-icon-btn" title="Xoay phải 90°">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/><rect x="7" y="9" width="8" height="8" rx="1.2"/></svg>
+                      </button>
+                      <button type="button" id="btn-flip-h" class="crop-icon-btn" title="Lật ngang (Soi gương)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="3" x2="12" y2="21" stroke-dasharray="2 2"/><polygon points="8 7 3 12 8 17 8 7"/><polygon points="16 7 21 12 16 17 16 7"/></svg>
+                      </button>
+                      <button type="button" id="btn-flip-v" class="crop-icon-btn" title="Lật dọc">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="12" x2="21" y2="12" stroke-dasharray="2 2"/><polygon points="7 8 12 3 17 8 7 8"/><polygon points="7 16 12 21 17 16 7 16"/></svg>
+                      </button>
+                    </div>
+                    <div class="crop-ai-straighten-row">
+                      <span class="crop-toggle-label">AI Hiệu Chỉnh</span>
+                      <button type="button" id="btn-ai-auto-straighten" class="crop-auto-pill">Tự động</button>
+                    </div>
+                    <div class="retouch-slider-item" style="margin-top:8px">
+                      <div class="s-head"><span>Góc</span><span class="val" data-for="rotateAngle">0.00</span></div>
+                      <input type="range" class="retouch-slider" id="rotateAngle" min="-45" max="45" step="0.1" value="0" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 2: PHỐI CẢNH & MỞ RỘNG -->
+              <div id="crop-pane-expand" class="crop-subtab-pane">
+                <div class="retouch-acc-group">
+                  <div class="retouch-acc-title">▾ Biến dạng phối cảnh</div>
+                  <div class="retouch-acc-body">
+                    <div class="retouch-slider-item"><div class="s-head"><span>Biến dạng dọc (Keystone V)</span><span class="val" data-for="keystoneVertical">0</span></div><input type="range" class="retouch-slider" id="keystoneVertical" min="-50" max="50" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Biến dạng ngang (Keystone H)</span><span class="val" data-for="keystoneHorizontal">0</span></div><input type="range" class="retouch-slider" id="keystoneHorizontal" min="-50" max="50" value="0" /></div>
+                  </div>
+                </div>
+                <div class="retouch-acc-group">
+                  <div class="retouch-acc-title">▾ Hình học &amp; Mở rộng khung</div>
+                  <div class="retouch-acc-body">
+                    <div class="retouch-slider-item"><div class="s-head"><span>Thu phóng hình (%)</span><span class="val" data-for="geoScale">100</span></div><input type="range" class="retouch-slider" id="geoScale" min="50" max="200" value="100" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ lệch trục X</span><span class="val" data-for="geoOffsetX">0</span></div><input type="range" class="retouch-slider" id="geoOffsetX" min="-100" max="100" value="0" /></div>
+                    <div class="retouch-slider-item"><div class="s-head"><span>Độ lệch trục Y</span><span class="val" data-for="geoOffsetY">0</span></div><input type="range" class="retouch-slider" id="geoOffsetY" min="-100" max="100" value="0" /></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CHÂN BẢNG PHẢI CỐ ĐỊNH KIỂU EVOTO -->
+          <div class="inspector-footer">
+            <button id="btn-save-user-preset-footer" type="button" class="evoto-footer-pill">Lưu cài sẵn mới</button>
+            <button id="btn-sync-all-footer" type="button" class="evoto-footer-pill">Đồng bộ tất cả</button>
+            <button id="btn-reset-all-footer" type="button" class="evoto-footer-gear" title="Đặt lại toàn bộ thông số ảnh hiện tại">↺</button>
+          </div>
+        </aside>
