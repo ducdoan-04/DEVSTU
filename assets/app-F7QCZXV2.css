@@ -2339,3 +2339,46 @@ body:has(.panel[data-mt="crop"]) .heal-card.crop-card,
   font-size: 20px;
   line-height: 1;
 }
+
+/* ==========================================================================
+   Collabs Retouch Pro: Right Tab Bar (.mtabs) Dock Fix
+   Ensure the right vertical tab bar is NEVER hidden when on "Cắt & Xoay" tab
+   ========================================================================== */
+#app:has(.panel[data-mt="crop"]) .mtabs,
+#app.desk-rail:has(.panel[data-mt="crop"]) .mtabs,
+#app.app-tool-open:has(.panel[data-mt="crop"]) .mtabs {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  position: absolute !important;
+  z-index: 6 !important;
+  top: 62px !important;
+  right: 0 !important;
+  width: 60px !important;
+  padding: 0 4px !important;
+}
+
+#app:has(.panel[data-mt="crop"]) .panel,
+#app.desk-rail:has(.panel[data-mt="crop"]) .panel,
+#app.app-tool-open:has(.panel[data-mt="crop"]) .panel,
+.panel[data-mt="crop"] {
+  width: 328px !important;
+  margin-right: 60px !important;
+}
+
+/* Ensure the Crop button in .mtabs is properly highlighted when selected */
+.mtabs button[data-mt="crop"][aria-selected="true"] {
+  background: #ffffff14 !important;
+  color: #fff !important;
+}
+.mtabs button[data-mt="crop"][aria-selected="true"] svg {
+  color: var(--accent) !important;
+}
+
+/* Ensure the old duplicate crop popup/card in dock is hidden */
+.heal-card.crop-card,
+.panel-dock .crop-card,
+.panel-dock > .heal-card.crop-card {
+  display: none !important;
+}
