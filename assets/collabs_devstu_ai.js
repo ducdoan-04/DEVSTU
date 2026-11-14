@@ -115,6 +115,60 @@
     return null;
   }
 
+  // Apply in-place result to photo with proper DEVSTU WebGL GPU texture reload
+  async function applyInPlaceResult(photo, dataUrl, filename, isAi) {
+    var newFile = dataURLtoFile(dataUrl, filename);
+
+    // Create ImageBitmap and thumbnails
+    var newBmp = null;
+    var newThumb = null;
+    try {
+      if (typeof createImageBitmap === 'function') {
+        newBmp = await createImageBitmap(newFile);
+        newThumb = await createImageBitmap(newBmp, { resizeWidth: 160, resizeHeight: 120, resizeQuality: 'medium' });
+      }
+    } catch (e) {
+      console.warn('[CollabsAI] createImageBitmap error:', e);
+    }
+
+    photo.file = newFile;
+    photo.src = {
+      kind: 'image',
+      file: newFile,
+      blob: newFile,
+      sensorLong: (photo.src && photo.src.sensorLong) || 0
+    };
+    if (newBmp) {
+      photo.width = newBmp.width;
+      photo.height = newBmp.height;
+    }
+    if (newThumb) {
+      photo.thumb = newThumb;
+      photo.editedThumb = null;
+    }
+    photo._devstuDataUrl = dataUrl;
+    photo._isAiVersion = !!isAi;
+
+    // Reload DEVSTU viewer GPU texture and render
+    if (typeof window._devstuReloadPhoto === 'function') {
+      await window._devstuReloadPhoto(photo);
+    } else {
+      if (window._devstuViewer) {
+        try { window._devstuViewer.forget(); } catch (e) {}
+        try { if (window._devstuViewer.pre) window._devstuViewer.pre.delete(photo.id); } catch (e) {}
+      }
+      if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
+        try { window._devstuStage.loadPhoto(photo); } catch (e) {}
+      }
+      if (window._devstuA) {
+        try { window._devstuA.emit('photos'); } catch (e) {}
+        try { window._devstuA.emit('current'); } catch (e) {}
+        try { window._devstuA.emit('state'); } catch (e) {}
+        try { window._devstuA.emit('thumbs'); } catch (e) {}
+      }
+    }
+  }
+
   // Restore original photo if modified by LiYing or Evoto AI
   function restoreOriginalPhoto(photo) {
     if (!photo || !photo._originalBackup) return false;
@@ -124,14 +178,26 @@
     if (b.thumb) photo.thumb = b.thumb;
     if (b.editedThumb) photo.editedThumb = b.editedThumb;
     if (b.dataUrl) photo._devstuDataUrl = b.dataUrl;
+    if (b.width) photo.width = b.width;
+    if (b.height) photo.height = b.height;
     photo._isAiVersion = false;
 
-    if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
-      try { window._devstuStage.loadPhoto(photo); } catch (e) {}
-    }
-    if (window._devstuA) {
-      window._devstuA.emit('photos');
-      window._devstuA.emit('current');
+    if (typeof window._devstuReloadPhoto === 'function') {
+      window._devstuReloadPhoto(photo);
+    } else {
+      if (window._devstuViewer) {
+        try { window._devstuViewer.forget(); } catch (e) {}
+        try { if (window._devstuViewer.pre) window._devstuViewer.pre.delete(photo.id); } catch (e) {}
+      }
+      if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
+        try { window._devstuStage.loadPhoto(photo); } catch (e) {}
+      }
+      if (window._devstuA) {
+        try { window._devstuA.emit('photos'); } catch (e) {}
+        try { window._devstuA.emit('current'); } catch (e) {}
+        try { window._devstuA.emit('state'); } catch (e) {}
+        try { window._devstuA.emit('thumbs'); } catch (e) {}
+      }
     }
     return true;
   }
@@ -143,7 +209,21 @@
     if (!photo) throw new Error('Không có ảnh đang chọn');
     options = options || {};
 
-    var dataUrl = await getPhotoDataUrl(photo);
+    // Backup original photo before first modification
+    if (!photo._originalBackup) {
+      var origUrl = await getPhotoDataUrl(photo);
+      photo._originalBackup = {
+        file: photo.file,
+        src: photo.src,
+        thumb: photo.thumb,
+        editedThumb: photo.editedThumb,
+        dataUrl: photo._devstuDataUrl || origUrl,
+        width: photo.width,
+        height: photo.height
+      };
+    }
+
+    var dataUrl = (photo._originalBackup && photo._originalBackup.dataUrl) || (await getPhotoDataUrl(photo));
     if (!dataUrl) throw new Error('Không đọc được dữ liệu ảnh gốc');
 
     var color = options.color || 'blue';
@@ -168,45 +248,11 @@
       throw new Error(res && res.error ? res.error : 'Máy chủ LiYing AI không phản hồi');
     }
 
-    // Backup original photo if not yet stored
-    if (!photo._originalBackup) {
-      photo._originalBackup = {
-        file: photo.file,
-        src: photo.src,
-        thumb: photo.thumb,
-        editedThumb: photo.editedThumb,
-        dataUrl: photo._devstuDataUrl || dataUrl
-      };
-    }
-
     var baseName = (photo.name || (photo.file && photo.file.name) || 'photo').replace(/\.[^.]+$/, '');
     var suffix = levelOnly ? '_can_vai.png' : ('_nen_' + (options.label || color) + '.png');
-    var newFile = dataURLtoFile(res.data_url, baseName + suffix);
+    var filename = baseName + suffix;
 
-    // Apply in-place onto the current photo
-    photo.file = newFile;
-    photo.src = URL.createObjectURL(newFile);
-    photo._devstuDataUrl = res.data_url;
-    photo._isAiVersion = true;
-
-    // Update thumbnail bitmap
-    try {
-      if (typeof createImageBitmap === 'function') {
-        createImageBitmap(newFile, { resizeWidth: 160, resizeHeight: 120, resizeQuality: 'medium' }).then(function(bmp) {
-          photo.thumb = bmp;
-          if (window._devstuA) window._devstuA.emit('thumbs');
-        }).catch(function() {});
-      }
-    } catch (e) {}
-
-    // Reload active stage viewer & inform DEVSTU
-    if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
-      try { window._devstuStage.loadPhoto(photo); } catch (e) {}
-    }
-    if (window._devstuA) {
-      window._devstuA.emit('photos');
-      window._devstuA.emit('current');
-    }
+    await applyInPlaceResult(photo, res.data_url, filename, true);
 
     return res;
   }
@@ -270,32 +316,9 @@
 
     var baseName = (photo.name || (photo.file && photo.file.name) || 'photo').replace(/\.[^.]+$/, '');
     var code = (options.code || preset).toUpperCase();
-    var newFile = dataURLtoFile(res.data_url, baseName + '_' + code + '.png');
+    var filename = baseName + '_' + code + '.png';
 
-    // Apply in-place onto the current photo
-    photo.file = newFile;
-    photo.src = URL.createObjectURL(newFile);
-    photo._devstuDataUrl = res.data_url;
-    photo._isAiVersion = true;
-
-    // Update thumbnail bitmap
-    try {
-      if (typeof createImageBitmap === 'function') {
-        createImageBitmap(newFile, { resizeWidth: 160, resizeHeight: 120, resizeQuality: 'medium' }).then(function(bmp) {
-          photo.thumb = bmp;
-          if (window._devstuA) window._devstuA.emit('thumbs');
-        }).catch(function() {});
-      }
-    } catch (e) {}
-
-    // Reload active stage viewer & inform DEVSTU
-    if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
-      try { window._devstuStage.loadPhoto(photo); } catch (e) {}
-    }
-    if (window._devstuA) {
-      window._devstuA.emit('photos');
-      window._devstuA.emit('current');
-    }
+    await applyInPlaceResult(photo, res.data_url, filename, true);
 
     return res;
   }
@@ -537,29 +560,9 @@
       : outCanvas.toDataURL('image/jpeg', 0.95);
 
     var baseName = (photo.name || (photo.file && photo.file.name) || 'photo').replace(/\.[^.]+$/, '');
-    var newFile = dataURLtoFile(outDataUrl, baseName + '_nen_' + mode + (mode === 'transparent' ? '.png' : '.jpg'));
+    var filename = baseName + '_nen_' + mode + (mode === 'transparent' ? '.png' : '.jpg');
 
-    photo.file = newFile;
-    photo.src = URL.createObjectURL(newFile);
-    photo._devstuDataUrl = outDataUrl;
-    photo._isAiVersion = true;
-
-    try {
-      if (typeof createImageBitmap === 'function') {
-        createImageBitmap(newFile, { resizeWidth: 160, resizeHeight: 120, resizeQuality: 'medium' }).then(function(bmp) {
-          photo.thumb = bmp;
-          if (window._devstuA) window._devstuA.emit('thumbs');
-        }).catch(function() {});
-      }
-    } catch (e) {}
-
-    if (window._devstuStage && typeof window._devstuStage.loadPhoto === 'function') {
-      try { window._devstuStage.loadPhoto(photo); } catch (e) {}
-    }
-    if (window._devstuA) {
-      window._devstuA.emit('photos');
-      window._devstuA.emit('current');
-    }
+    await applyInPlaceResult(photo, outDataUrl, filename, true);
 
     return { ok: true, data_url: outDataUrl };
   }
