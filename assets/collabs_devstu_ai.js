@@ -165,7 +165,7 @@
     photo.editedThumb = null;
 
     if (newThumb) {
-      if (photo.thumb && typeof photo.thumb.close === 'function') {
+      if (photo.thumb && photo.thumb !== (photo._originalBackup && photo._originalBackup.thumb) && typeof photo.thumb.close === 'function') {
         try { photo.thumb.close(); } catch (e) {}
       }
       photo.thumb = newThumb;
@@ -204,11 +204,43 @@
       try { photo.editedThumb.close(); } catch (e) {}
     }
     photo.editedThumb = null;
+
     if (b.thumb) photo.thumb = b.thumb;
     if (b.dataUrl) photo._devstuDataUrl = b.dataUrl;
     if (b.width) photo.width = b.width;
     if (b.height) photo.height = b.height;
     photo._isAiVersion = false;
+    photo._aiMatteDataUrl = null;
+    photo._hairMaskDataUrl = null;
+
+    // Reset UI controls
+    if (typeof window._collabsResetBgUi === 'function') {
+      try { window._collabsResetBgUi(photo); } catch (e) {}
+    }
+    if (typeof window._collabsResetHairUi === 'function') {
+      try { window._collabsResetHairUi(photo); } catch (e) {}
+    }
+
+    // Regenerate fresh proportional thumbnail from original file
+    if (b.file && typeof createImageBitmap === 'function') {
+      createImageBitmap(b.file).then(function(bmp) {
+        var tDim = calcThumbDimensions(bmp.width, bmp.height, 360);
+        return createImageBitmap(bmp, {
+          resizeWidth: tDim.width,
+          resizeHeight: tDim.height,
+          resizeQuality: 'high'
+        }).then(function(freshThumb) {
+          if (bmp.close) bmp.close();
+          photo.thumb = freshThumb;
+          if (window._devstuA) {
+            try { window._devstuA.emit('thumbs'); } catch (e) {}
+            try { window._devstuA.emit('photos'); } catch (e) {}
+          }
+        });
+      }).catch(function(err) {
+        console.warn('[CollabsAI] Recreating thumb error:', err);
+      });
+    }
 
     if (typeof window._devstuReloadPhoto === 'function') {
       window._devstuReloadPhoto(photo);
@@ -229,6 +261,8 @@
     }
     return true;
   }
+  window._collabsRestoreOriginalPhoto = restoreOriginalPhoto;
+  window._collabsResetAllPhotoAi = restoreOriginalPhoto;
 
   // Execute LiYing Background Replacement (RMBG-1.4 + Pose Alignment)
   // UPDATED: Modifies current photo IN-PLACE with undo/restore support, NEVER creates extra files!
@@ -300,6 +334,20 @@
     var dataUrl = await getPhotoDataUrl(photo);
     if (!dataUrl) throw new Error('Không đọc được dữ liệu ảnh gốc');
 
+    // Backup original photo if not yet stored
+    if (!photo._originalBackup) {
+      photo._originalBackup = {
+        file: photo.file,
+        src: photo.src,
+        thumb: photo.thumb,
+        editedThumb: photo.editedThumb,
+        dataUrl: photo._devstuDataUrl || dataUrl,
+        width: photo.width,
+        height: photo.height
+      };
+    }
+    var baseDataUrl = (photo._originalBackup && photo._originalBackup.dataUrl) || dataUrl;
+
     // Extract or get cached MediaPipe hair mask
     var maskB64 = await ensurePhotoAiMask(photo);
 
@@ -314,7 +362,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        image_base64: dataUrl,
+        image_base64: baseDataUrl,
         mask_base64: maskB64,
         preset: preset,
         strength: strength,
@@ -329,17 +377,6 @@
     var res = await resp.json();
     if (!res || !res.ok || !res.data_url) {
       throw new Error(res && res.error ? res.error : 'Bộ xử lý tóc Collabs Evoto không phản hồi');
-    }
-
-    // Backup original photo if not yet stored
-    if (!photo._originalBackup) {
-      photo._originalBackup = {
-        file: photo.file,
-        src: photo.src,
-        thumb: photo.thumb,
-        editedThumb: photo.editedThumb,
-        dataUrl: photo._devstuDataUrl || dataUrl
-      };
     }
 
     var baseName = (photo.name || (photo.file && photo.file.name) || 'photo').replace(/\.[^.]+$/, '');
@@ -405,7 +442,9 @@
         src: photo.src,
         thumb: photo.thumb,
         editedThumb: photo.editedThumb,
-        dataUrl: photo._devstuDataUrl || origUrl
+        dataUrl: photo._devstuDataUrl || origUrl,
+        width: photo.width,
+        height: photo.height
       };
     }
 
