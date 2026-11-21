@@ -1,0 +1,325 @@
+/* DEVSTU Startup Splash Screen (5s) */
+@font-face {
+  font-family: "LK Noto Sans";
+  src: url("fonts/lk-noto-sans-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+html.lk-startup-standalone,
+html.lk-startup-standalone body {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  color: #e0f2fe !important;
+  font-family: "LK Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#lk-startup-backdrop-v2 {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  background: rgba(4, 9, 19, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 1;
+  transition: opacity 0.28s ease;
+  font-family: "LK Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#lk-startup-backdrop-v2.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lk-startup-shell-v2 {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid #0284c7;
+  border-radius: 14px;
+  color: #e0f2fe;
+  background:
+    radial-gradient(ellipse at 50% -40%, rgba(14, 165, 233, 0.35), transparent 68%),
+    linear-gradient(145deg, #0a1528, #040913);
+}
+
+#lk-startup-backdrop-v2 .lk-startup-shell-v2 {
+  width: min(1120px, calc(100vw - 32px));
+  height: min(520px, calc(100vh - 32px));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(56, 189, 248, 0.16);
+}
+
+.lk-startup-header-v2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 40;
+}
+
+.lk-startup-drag-v2 {
+  flex: 1;
+  height: 28px;
+}
+
+.lk-startup-close-v2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-top-right-radius: 13px;
+  background: transparent;
+  color: #38bdf8;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lk-startup-close-v2:hover {
+  background: #0369a1;
+  color: #ffffff;
+}
+
+.lk-startup-close-v2:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: -2px;
+}
+
+#lk-startup-stage-v2 {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 28px 0 0 0;
+  z-index: 10;
+  display: grid;
+  grid-template-rows: 160px 24px minmax(100px, 1fr) 24px 10px;
+  row-gap: 6px;
+  justify-items: center;
+  padding: 4px 22px 18px;
+}
+
+#lk-startup-stage-v2 .lk-startup-logo-v2 {
+  display: block;
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+
+#lk-startup-stage-v2 .lk-startup-tagline-v2 {
+  margin: 0 !important;
+  padding: 0 !important;
+  align-self: center;
+  text-align: center;
+  color: #38bdf8 !important;
+  font-family: "LK Noto Sans", "Segoe UI", system-ui, sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  line-height: 24px !important;
+  letter-spacing: 1.4px !important;
+  white-space: nowrap;
+}
+
+#lk-startup-stage-v2 .lk-startup-guide-v2 {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-width: 920px;
+  min-height: 0;
+  object-fit: contain;
+  object-position: center;
+  overflow: hidden;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+#lk-startup-stage-v2 .lk-startup-status-row-v2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(680px, 85%);
+  gap: 16px;
+  line-height: 24px;
+  color: #7dd3fc;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+#lk-startup-stage-v2 .lk-startup-status-v2 {
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 24px !important;
+  color: #7dd3fc !important;
+  font-family: "LK Noto Sans", "Segoe UI", system-ui, sans-serif !important;
+}
+
+#lk-startup-stage-v2 .lk-startup-percent-v2 {
+  min-width: 44px;
+  text-align: right;
+  color: #38bdf8;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+#lk-startup-stage-v2 .lk-startup-track-v2 {
+  position: relative;
+  width: min(680px, 85%);
+  height: 7px;
+  overflow: hidden;
+  border: 1px solid #0369a1;
+  border-radius: 10px;
+  background: #0f172a;
+}
+
+#lk-startup-stage-v2 .lk-startup-fill-v2 {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0284c7, #38bdf8, #60a5fa);
+  transition: width 0.14s linear;
+}
+
+#lk-startup-stage-v2 .lk-startup-details-v2 {
+  position: absolute;
+  right: 14px;
+  bottom: 4px;
+  z-index: 12;
+  margin: 0;
+  padding: 2px 4px;
+  background: none;
+  border: 0;
+  color: #38bdf8;
+  font-family: "LK Noto Sans", "Segoe UI", system-ui, sans-serif;
+  font-size: 10px;
+  line-height: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#lk-startup-stage-v2 .lk-startup-details-v2:hover {
+  color: #bae6fd;
+}
+
+.lk-startup-log-panel-v2 {
+  position: absolute;
+  inset: 34px 22px 18px 22px;
+  z-index: 25;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 22px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(6, 13, 26, 0.96);
+  backdrop-filter: blur(8px);
+}
+
+.lk-startup-shell-v2.show-logs .lk-startup-log-panel-v2 {
+  display: flex;
+}
+
+.lk-startup-log-head-v2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lk-startup-log-title-v2 {
+  margin: 0;
+  color: #38bdf8;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.lk-startup-log-back-v2 {
+  border: 1px solid #0284c7;
+  border-radius: 6px;
+  background: #0ea5e9;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.lk-startup-log-back-v2:hover {
+  background: #0284c7;
+}
+
+.lk-startup-log-list-v2 {
+  flex: 1;
+  margin: 0;
+  padding: 12px 14px;
+  list-style: none;
+  overflow: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(3, 105, 161, 0.55);
+  background: #040913;
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.65;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+@media (max-height: 475px) {
+  #lk-startup-stage-v2 {
+    grid-template-rows: 118px 22px minmax(80px, 1fr) 22px 9px;
+    row-gap: 4px;
+    padding-top: 2px;
+    padding-bottom: 14px;
+  }
+  #lk-startup-stage-v2 .lk-startup-logo-v2 {
+    width: 118px;
+    height: 118px;
+  }
+  #lk-startup-stage-v2 .lk-startup-tagline-v2 {
+    font-size: 15px !important;
+  }
+}
+
+@media (max-width: 850px) {
+  #lk-startup-stage-v2 {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  #lk-startup-stage-v2 .lk-startup-tagline-v2 {
+    font-size: 14px !important;
+    letter-spacing: 1px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #lk-startup-stage-v2 .lk-startup-fill-v2,
+  #lk-startup-backdrop-v2 {
+    transition: none !important;
+  }
+}

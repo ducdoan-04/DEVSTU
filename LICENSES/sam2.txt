@@ -10,7 +10,7 @@ https://huggingface.co/onnx-community/sam2.1-hiera-tiny-ONNX
   onnx/vision_encoder_fp16.onnx_data          sha256 a4dd3759e9b6a476d991fb3493787992e78777e51462695e1bede71ae258103e (67005504 bytes)
   onnx/prompt_encoder_mask_decoder.onnx       sha256 874414704c5d686db7d206a35f6e15d26563d50c8c4468fccc6739bd7e491dcf
   onnx/prompt_encoder_mask_decoder.onnx_data  sha256 e9874d900dd4134ed60eab1e97910327c2419e0b2954485d8fd6e7f1a1470f47
-Modified by Fotoreto: files renamed; vision_encoder_fp16.onnx_data split into 3 equal parts (joined back unchanged in the
+Modified by DEVSTU: files renamed; vision_encoder_fp16.onnx_data split into 3 equal parts (joined back unchanged in the
 browser). No retraining.
 
                                  Apache License

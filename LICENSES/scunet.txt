@@ -4,7 +4,7 @@ Model: Practical Blind Image Denoising via Swin-Conv-UNet and Data Synthesis, Ka
 Yulun Zhang, Hao Tang, Deng-Ping Fan, Radu Timofte, Luc Van Gool — https://github.com/cszn/SCUNet
 Weights: scunet_color_real_psnr.pth from https://github.com/cszn/KAIR/releases/tag/v1.0
 (sha256 fa78899ba2caec9d235a900e91d96c689da71c42029230c2028b00f09f809c2e).
-Converted by Fotoreto to ONNX (fixed 256x256 input, opset 17), float32 weights stored as float16
+Converted by DEVSTU to ONNX (fixed 256x256 input, opset 17), float32 weights stored as float16
 (tools/onnx-fp16-store.py): 38686995 bytes, sha256 49e6b5251dc2bc8d64c10b38c3bb1843d5add8a53b36aef371c5bb18a09b6c99.
 Modified from the original: format conversion only (no retraining).
 Second copy for GPUs with shader-f16 (06/11/2026) — vendor/scunet2/scunet-f16-512.part1.bin + part2.bin: same weights, fixed 512x512 input,

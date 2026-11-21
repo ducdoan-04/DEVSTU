@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <!-- Chỉ chạy mã của chính app, không nạp gì từ nơi khác, không gửi ảnh đi đâu (connect-src 'self' + máy chủ tài khoản devstu.local — chỉ trao đổi tài khoản / quyền dùng, không bao giờ có ảnh;
      img-src qr.sepay.vn: ảnh mã VietQR khi người dùng mua Premium bằng chuyển khoản; hoangphucphoto.com + R2 của Kho (332e85c5….r2.cloudflarestorage.com — chỉ tài khoản R2 này, rà bảo mật 10/11):
-     nút "Chỉnh ảnh này ngay trên Fotoreto" của Kho ảnh RAW — hỏi thông tin file + tải file RAW người dùng bấm, ảnh thẻ sản phẩm; shotpik.com: "Chỉnh ảnh Shotpik" — chỉ ĐỌC dữ liệu khách chọn của album theo link người dùng dán, không gửi ảnh).
+     nút "Chỉnh ảnh này ngay trên DEVSTU" của Kho ảnh RAW — hỏi thông tin file + tải file RAW người dùng bấm, ảnh thẻ sản phẩm; shotpik.com: "Chỉnh ảnh Shotpik" — chỉ ĐỌC dữ liệu khách chọn của album theo link người dùng dán, không gửi ảnh).
      Worker giải mã HEIC/RAW nhận chính sách riêng từ file của chúng, nên không bị chặn. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://image.shotpik.com https://qr.sepay.vn ; connect-src 'self' blob: data: https://shotpik.com https://332e85c59c5198726134adc11e42c78d.r2.cloudflarestorage.com; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -19,15 +19,19 @@
 <link rel="icon" type="image/png" sizes="48x48" href="icons/fr-favicon-48.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/fr-icon-192.png">
 <link rel="apple-touch-icon" href="icons/fr-apple-touch-icon.png">
-<link rel="stylesheet" href="assets/app-F7QCZXV2.css">
+<link rel="stylesheet" href="assets/lk-startup-v2.css?v=devstu1">
+<link rel="stylesheet" href="assets/app-F7QCZXV2.css?v=devstu19">
 </head>
 <body>
+<script src="assets/lk-startup-v2.js?v=devstu1"></script>
 <div id="app"></div>
 <noscript><p style="padding:24px;color:#fff;font-family:system-ui">App cần bật JavaScript để chạy.</p></noscript>
 <script src="assets/vision_bundle.js"></script>
-<script type="module" src="assets/ai_masks.js?v=devstu5"></script>
-<script src="assets/collabs_devstu_ai.js?v=devstu5"></script>
-<script src="assets/stu_ultra_module.js?v=devstu5"></script>
-<script type="module" src="assets/app-7UAGS7H2.js?v=devstu5" data-no-optimize="1" data-no-defer="1" data-cfasync="false"></script>
+<script type="module" src="assets/ai_masks.js?v=devstu12"></script>
+<script src="assets/collabs_devstu_ai.js?v=devstu12"></script>
+<script src="assets/stu_ultra_module.js?v=devstu12"></script>
+<script src="assets/stu_ultra_max_module.js?v=devstu13"></script>
+<script src="assets/devstu_exit_confirm.js?v=devstu12"></script>
+<script type="module" src="assets/app-7UAGS7H2.js?v=devstu19" data-no-optimize="1" data-no-defer="1" data-cfasync="false"></script>
 </body>
 </html>

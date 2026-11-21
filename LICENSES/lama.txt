@@ -8,7 +8,7 @@ https://github.com/advimman/lama  (Apache License 2.0)
 ONNX export (fixed 512 x 512, FourierUnitJIT): https://huggingface.co/Carve/LaMa-ONNX  (Apache License 2.0)
   file lama_fp32.onnx, 208,044,816 bytes, sha256 1faef5301d78db7dda502fe59966957ec4b79dd64e16f03ed96913c7a4eb68d6
 
-Modification by Fotoreto: float32 weights stored as float16 with Cast nodes (tools/onnx-fp16-store.py), result
+Modification by DEVSTU: float32 weights stored as float16 with Cast nodes (tools/onnx-fp16-store.py), result
 106,291,628 bytes, sha256 553706aceea06ac0f8b978ad31b6824ec0a6159931d6c060289b703aae49dc5c, split into 3 parts.
 
 Training data: Places365 (Places2) — B. Zhou, A. Lapedriza, A. Khosla, A. Oliva, A. Torralba,

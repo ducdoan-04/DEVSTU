@@ -212,6 +212,7 @@
     photo._isAiVersion = false;
     photo._aiMatteDataUrl = null;
     photo._hairMaskDataUrl = null;
+    photo._collabsBgState = null;
 
     // Reset UI controls
     if (typeof window._collabsResetBgUi === 'function') {
@@ -305,6 +306,19 @@
       })
     });
 
+    if (!resp.ok) {
+      var errTxt = await resp.text();
+      try {
+        var errObj = JSON.parse(errTxt);
+        throw new Error(errObj.error || errObj.message || ('Lỗi máy chủ (' + resp.status + ')'));
+      } catch (e) {
+        if (resp.status === 404) {
+          throw new Error('Máy chủ trả về 404 Not Found. Hãy tắt app DEVSTU và copy file DEVSTU.exe mới từ src-tauri/target/release sang thư mục gốc.');
+        }
+        throw new Error(e.message && !e.message.startsWith('Unexpected') ? e.message : (errTxt || ('Lỗi HTTP ' + resp.status)));
+      }
+    }
+
     var res = await resp.json();
     if (!res || !res.ok || !res.data_url) {
       throw new Error(res && res.error ? res.error : 'Máy chủ LiYing AI không phản hồi');
@@ -316,6 +330,105 @@
 
     await applyInPlaceResult(photo, res.data_url, filename, true);
 
+    return res;
+  }
+
+  // Execute LK Magic Pro Background Replacement (model_29 + BGFusion)
+  async function runLkBackgroundReplacement(photo, options) {
+    photo = photo || (window._devstuA ? window._devstuA.current : null);
+    if (!photo) throw new Error('Không có ảnh đang chọn');
+    options = options || {};
+
+    // Backup original photo before first modification
+    if (!photo._originalBackup) {
+      var origUrl = await getPhotoDataUrl(photo);
+      photo._originalBackup = {
+        file: photo.file,
+        src: photo.src,
+        thumb: photo.thumb,
+        editedThumb: photo.editedThumb,
+        dataUrl: photo._devstuDataUrl || origUrl,
+        width: photo.width,
+        height: photo.height
+      };
+    }
+
+    var dataUrl = (photo._originalBackup && photo._originalBackup.dataUrl) || (await getPhotoDataUrl(photo));
+    if (!dataUrl) throw new Error('Không đọc được dữ liệu ảnh gốc');
+
+    var color = options.color || 'sifalan';
+    var transparent = Boolean(options.transparent);
+
+    var resp = await fetch('/api/lk_change_background', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image_base64: dataUrl,
+        color: color,
+        transparent: transparent
+      })
+    });
+
+    if (!resp.ok) {
+      var errTxt = await resp.text();
+      try {
+        var errObj = JSON.parse(errTxt);
+        throw new Error(errObj.error || errObj.message || ('Lỗi máy chủ LK (' + resp.status + ')'));
+      } catch (e) {
+        throw new Error(e.message && !e.message.startsWith('Unexpected') ? e.message : (errTxt || ('Lỗi HTTP ' + resp.status)));
+      }
+    }
+
+    var res = await resp.json();
+    if (!res || !res.ok || !res.data_url) {
+      throw new Error(res && res.error ? res.error : 'Máy chủ LK AI không phản hồi');
+    }
+
+    if (res.matte_data_url) {
+      photo._aiMatteDataUrl = res.matte_data_url;
+    }
+
+    var baseName = (photo.name || (photo.file && photo.file.name) || 'photo').replace(/\.[^.]+$/, '');
+    var suffix = transparent ? '_tach_nen_lk.png' : ('_nen_lk_' + (options.label || color) + '.png');
+    var filename = baseName + suffix;
+
+    await applyInPlaceResult(photo, res.data_url, filename, true);
+
+    return res;
+  }
+
+  // Execute LK Magic Pro Cutout (model_29 transparent alpha matting)
+  async function runLkMattingCutout(photo) {
+    return runLkBackgroundReplacement(photo, { transparent: true, label: 'trong_suot' });
+  }
+
+  // Execute LK Sky Replacement (model_82 + sky.json)
+  async function runLkSkyReplacement(photo, options) {
+    photo = photo || (window._devstuA ? window._devstuA.current : null);
+    if (!photo) throw new Error('Không có ảnh đang chọn');
+    options = options || {};
+
+    if (!photo._originalBackup) {
+      var origUrl = await getPhotoDataUrl(photo);
+      photo._originalBackup = {
+        file: photo.file,
+        src: photo.src,
+        thumb: photo.thumb,
+        editedThumb: photo.editedThumb,
+        dataUrl: photo._devstuDataUrl || origUrl,
+        width: photo.width,
+        height: photo.height
+      };
+    }
+
+    var dataUrl = (photo._originalBackup && photo._originalBackup.dataUrl) || (await getPhotoDataUrl(photo));
+    var resp = await fetch('/api/lk_sky_replacement', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image_base64: dataUrl })
+    });
+
+    var res = await resp.json();
     return res;
   }
 
@@ -374,6 +487,16 @@
       })
     });
 
+    if (!resp.ok) {
+      var errTxt = await resp.text();
+      try {
+        var errObj = JSON.parse(errTxt);
+        throw new Error(errObj.error || errObj.message || ('Lỗi máy chủ (' + resp.status + ')'));
+      } catch (e) {
+        throw new Error(e.message && !e.message.startsWith('Unexpected') ? e.message : (errTxt || ('Lỗi HTTP ' + resp.status)));
+      }
+    }
+
     var res = await resp.json();
     if (!res || !res.ok || !res.data_url) {
       throw new Error(res && res.error ? res.error : 'Bộ xử lý tóc Collabs Evoto không phản hồi');
@@ -388,29 +511,65 @@
     return res;
   }
 
-  // Extract high-res RMBG-1.4 matte from backend or cache
+  // Extract alpha channel into grayscale matte data URL when backend returns RGBA cutout
+  async function extractAlphaMatteFromRgba(rgbaUrl) {
+    var img = await loadImageElement(rgbaUrl);
+    var c = document.createElement('canvas');
+    c.width = img.naturalWidth || img.width || 1;
+    c.height = img.naturalHeight || img.height || 1;
+    var ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    var imgData = ctx.getImageData(0, 0, c.width, c.height);
+    var d = imgData.data;
+    for (var i = 0; i < d.length; i += 4) {
+      var a = d[i + 3];
+      d[i] = a;
+      d[i + 1] = a;
+      d[i + 2] = a;
+      d[i + 3] = 255;
+    }
+    ctx.putImageData(imgData, 0, 0);
+    return c.toDataURL('image/png');
+  }
+
+  // Extract high-res RMBG-1.4 / LK Portrait matte from backend or cache
   async function ensurePhotoAiMatte(photo) {
     if (!photo) return null;
     if (photo._aiMatteDataUrl) return photo._aiMatteDataUrl;
 
-    var dataUrl = await getPhotoDataUrl(photo);
-    if (!dataUrl) return null;
+    var dataUrl = (photo._originalBackup && photo._originalBackup.dataUrl && photo._originalBackup.dataUrl.indexOf('data:') === 0)
+      ? photo._originalBackup.dataUrl
+      : await getPhotoDataUrl(photo);
+    if (!dataUrl) throw new Error('Không đọc được dữ liệu ảnh gốc để tách nền');
 
-    try {
-      var resp = await fetch('/api/extract_matte', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image_base64: dataUrl })
-      });
-      var res = await resp.json();
-      if (res && res.ok && res.matte_data_url) {
-        photo._aiMatteDataUrl = res.matte_data_url;
-        return res.matte_data_url;
+    var endpoints = ['/api/extract_matte', '/api/extract_highres_matte'];
+    var lastErr = null;
+    for (var ei = 0; ei < endpoints.length; ei++) {
+      try {
+        var resp = await fetch(endpoints[ei], {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image_base64: dataUrl })
+        });
+        var res = await resp.json();
+        if (res && res.ok) {
+          if (res.matte_data_url) {
+            photo._aiMatteDataUrl = res.matte_data_url;
+            return res.matte_data_url;
+          }
+          if (res.data_url) {
+            var converted = await extractAlphaMatteFromRgba(res.data_url);
+            photo._aiMatteDataUrl = converted;
+            return converted;
+          }
+        }
+        lastErr = (res && res.error) ? res.error : ('HTTP ' + resp.status);
+      } catch (e) {
+        lastErr = (e && e.message) ? e.message : String(e);
+        console.warn('[CollabsAI] ' + endpoints[ei] + ' failed:', e);
       }
-    } catch (e) {
-      console.warn('[CollabsAI] extract_matte failed:', e);
     }
-    return null;
+    throw new Error('Không trích xuất được mặt nạ nền AI' + (lastErr ? ': ' + lastErr : ''));
   }
 
   function loadImageElement(url) {
@@ -451,23 +610,9 @@
     var baseDataUrl = photo._originalBackup.dataUrl;
     var matteUrl = photo._aiMatteDataUrl;
     if (!matteUrl) {
-      try {
-        matteUrl = await ensurePhotoAiMatte(photo);
-      } catch (e) {
-        console.warn('[CollabsAI] ensurePhotoAiMatte error:', e);
-      }
+      matteUrl = await ensurePhotoAiMatte(photo);
     }
-    if (!matteUrl) {
-      matteUrl = photo._aiSceneMaskBase64 || photo._aiMaskBase64;
-    }
-    if (!matteUrl) {
-      try {
-        matteUrl = await ensurePhotoAiMask(photo);
-      } catch (e) {
-        console.warn('[CollabsAI] ensurePhotoAiMask error:', e);
-      }
-    }
-    if (!matteUrl) throw new Error('Không trích xuất được mặt nạ nền AI (RMBG-1.4)');
+    if (!matteUrl) throw new Error('Không trích xuất được mặt nạ nền AI');
 
     var origImg = await loadImageElement(baseDataUrl);
     var maskImg = await loadImageElement(matteUrl);
@@ -576,7 +721,8 @@
     }
 
     var px = fgData.data;
-    for (var i = 0; i < px.length; i += 4) {
+    var alphaArr = new Float32Array(w * h);
+    for (var pi = 0, i = 0; i < px.length; i += 4, pi++) {
       var rawMatte = mPixels[i] / 255;
       var a = edgeShift !== 0 ? Math.max(0, Math.min(1, rawMatte - edgeShift)) : rawMatte;
       if (edgeMode === 'crisp') {
@@ -584,7 +730,49 @@
       } else if (edgeMode === 'soft') {
         a = smoothstep(0.01, 0.94, a);
       }
+      alphaArr[pi] = a;
       px[i + 3] = Math.round(a * 255);
+    }
+
+    // Decontaminate foreground fringe color using nearby opaque foreground pixels
+    if (options.decontaminate) {
+      var origPx = new Uint8ClampedArray(px);
+      for (var y = 1; y < h - 1; y++) {
+        var rowOff = y * w;
+        for (var x = 1; x < w - 1; x++) {
+          var idx = rowOff + x;
+          var aVal = alphaArr[idx];
+          if (aVal > 0.03 && aVal < 0.93) {
+            var sumW = 0, sumR = 0, sumG = 0, sumB = 0;
+            for (var dy = -2; dy <= 2; dy++) {
+              var yy = y + dy;
+              if (yy < 0 || yy >= h) continue;
+              var yOff = yy * w;
+              for (var dx = -2; dx <= 2; dx++) {
+                var xx = x + dx;
+                if (xx < 0 || xx >= w) continue;
+                var nIdx = yOff + xx;
+                var na = alphaArr[nIdx];
+                if (na > 0.9) {
+                  var nwgt = na * na;
+                  var nBase = nIdx * 4;
+                  sumW += nwgt;
+                  sumR += origPx[nBase] * nwgt;
+                  sumG += origPx[nBase + 1] * nwgt;
+                  sumB += origPx[nBase + 2] * nwgt;
+                }
+              }
+            }
+            if (sumW > 0.01) {
+              var base = idx * 4;
+              var blend = (1 - aVal) * 0.78;
+              px[base] = Math.round(origPx[base] * (1 - blend) + (sumR / sumW) * blend);
+              px[base + 1] = Math.round(origPx[base + 1] * (1 - blend) + (sumG / sumW) * blend);
+              px[base + 2] = Math.round(origPx[base + 2] * (1 - blend) + (sumB / sumW) * blend);
+            }
+          }
+        }
+      }
     }
     fgCtx.putImageData(fgData, 0, 0);
 
@@ -642,7 +830,17 @@
     ensurePhotoAiMatte: ensurePhotoAiMatte,
     applyCollabsBgComposite: applyCollabsBgComposite,
     runLiyingBackgroundReplacement: runLiyingBackgroundReplacement,
+    runLkBackgroundReplacement: runLkBackgroundReplacement,
+    runLkMattingCutout: runLkMattingCutout,
+    runLkSkyReplacement: runLkSkyReplacement,
     runEvotoHairDye: runEvotoHairDye,
+    restoreOriginalPhoto: restoreOriginalPhoto
+  };
+
+  window.LKMagicProAI = {
+    runLkBackgroundReplacement: runLkBackgroundReplacement,
+    runLkMattingCutout: runLkMattingCutout,
+    runLkSkyReplacement: runLkSkyReplacement,
     restoreOriginalPhoto: restoreOriginalPhoto
   };
 

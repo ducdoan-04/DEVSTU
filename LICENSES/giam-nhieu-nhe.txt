@@ -1,13 +1,13 @@
-Fotoreto light AI noise reduction model ("Giảm nhiễu bằng AI") — vendor/giam-nhieu-nhe/giam-nhieu-nhe-v1.enc (float32) + giam-nhieu-nhe-v1-f16.enc (float16)
+DEVSTU light AI noise reduction model ("Giảm nhiễu bằng AI") — vendor/giam-nhieu-nhe/giam-nhieu-nhe-v1.enc (float32) + giam-nhieu-nhe-v1-f16.enc (float16)
 
-Own model of Fotoreto / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 06/11/2026: U-Net with only 3x3 convolutions, ReLU, strided-conv
+Own model of DEVSTU / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 06/11/2026: U-Net with only 3x3 convolutions, ReLU, strided-conv
 downsampling and pixel-shuffle upsampling, ~4.2 million parameters. Trained by distillation: the targets are outputs of SCUNet
 (Apache License 2.0 — see scunet.txt) on ~11,500 crops of the author's own RAW / JPEG photos (1,920 files). No SCUNet weights or code
-are included in this model. Stored encrypted (AES-256-GCM); the key is given by the Fotoreto server to Premium users.
+are included in this model. Stored encrypted (AES-256-GCM); the key is given by the DEVSTU server to Premium users.
 
 sha256 6a4ad5e6035158c93195f921f4e55dc24f75dba203118c10e383adcb66e1ab0a  giam-nhieu-nhe-v1.onnx (before encryption)
 sha256 de7f9ca86e6418e7f39ee8b4acac76875795ffd3e2c3825ae9e4476afcd70732  giam-nhieu-nhe-v1-f16.onnx (before encryption)
 
-Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the Fotoreto app.
+Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the DEVSTU app.
 
 Runs with ONNX Runtime Web 1.31.1 (MIT) — see onnxruntime.txt.

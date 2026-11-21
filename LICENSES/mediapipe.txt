@@ -17,20 +17,20 @@ Model 2: Face Landmarker bundle (BlazeFace short range + Face Mesh V2 + Blendsha
   sha256 64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff
 
 Model 3: Pose Landmarker Full (BlazePose GHUM 3D — pose detector + pose landmarks detector, Google, released 2023-04-28 — model card
-"BlazePose GHUM 3D": "LICENSED UNDER Apache License, Version 2.0"). 33 body landmarks; used by Fotoreto for automatic body slimming
+"BlazePose GHUM 3D": "LICENSED UNDER Apache License, Version 2.0"). 33 body landmarks; used by DEVSTU for automatic body slimming
 (waist, arms, thighs). Downloaded 2026-10-28.
   https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task
   model card https://storage.googleapis.com/mediapipe-assets/Model%20Card%20BlazePose%20GHUM%203D.pdf
   sha256 4eaa5eb7a98365221087693fcc286334cf0858e2eb6e15b506aa4a7ecdcec4ad
 
 Model 4: Hand Landmarker (hand detector + hand landmarks detector, Google, released 2023-04-26 — model card "Hand Tracking (Lite/Full)
-with Fairness, Oct 2021": "LICENSED UNDER Apache License, Version 2.0"). 21 hand landmarks; used by Fotoreto for automatic hand slimming.
+with Fairness, Oct 2021": "LICENSED UNDER Apache License, Version 2.0"). 21 hand landmarks; used by DEVSTU for automatic hand slimming.
 Downloaded 2026-10-28.
   https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task
   sha256 fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1
 
 Model 5: Object Detector EfficientDet-Lite0 int8 (Google, MediaPipe Tasks — EfficientNet-Lite0 backbone + BiFPN, trained on COCO 2017;
-80 COCO classes, Fotoreto uses only "person" and the 10 animal classes). Used by Fotoreto's Culling screen to find photos with people /
+80 COCO classes, DEVSTU uses only "person" and the 10 animal classes). Used by DEVSTU's Culling screen to find photos with people /
 animals (on demand, on the user's device). Downloaded 2026-10-31 from Google's MediaPipe model storage:
   https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/int8/1/efficientdet_lite0.tflite
   sha256 0720bf247bd76e6594ea28fa9c6f7c5242be774818997dbbeffc4da460c723bb

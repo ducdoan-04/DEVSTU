@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = 3000;
-const REMOTE_BASE = 'https://app.fotoreto.com';
+const REMOTE_BASE = 'https://devstu.vercel.app';
 
 const MODEL_KEYS = {
   'da-retouch-v1': 'JibaelF7gqjnIGCgdiPy4TKEvYDVuZvv7LL81ctCcpw=',
@@ -86,7 +86,15 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
           on: false,
+          mode: 'wifi',
+          port: 2121,
+          user: 'DEVSTU',
+          pass: '123456',
+          ips: ['192.168.1.100'],
+          dir: 'Pictures\\DEVSTU-Tether',
+          usb_dir: 'Pictures\\DEVSTU-USB',
           cameras: [],
+          files: [],
           received: 0,
           done: 0,
           total: 0
@@ -133,7 +141,7 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({
           user: {
             id: 'pro_user',
-            email: 'pro@fotoreto.local',
+            email: 'pro@DEVSTU.local',
             name: 'Pro User',
             role: 'pro',
             newsletter: false
@@ -181,6 +189,19 @@ const server = http.createServer(async (req, res) => {
           fs.createReadStream(lutFile).pipe(res);
           return;
         }
+        try {
+          const remoteLutRes = await fetch(`${REMOTE_BASE}/cache_t/${hash}.bin`);
+          if (remoteLutRes.ok) {
+            const buf = Buffer.from(await remoteLutRes.arrayBuffer());
+            fs.mkdirSync(path.dirname(lutFile), { recursive: true });
+            fs.writeFileSync(lutFile, buf);
+            res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+            res.end(buf);
+            return;
+          }
+        } catch (err) {
+          console.error(`[Remote LUT Fetch Error] ${err.message}`);
+        }
       }
 
       if (apiPath === '/v1/notices' || apiPath.startsWith('/v1/notices/')) {
@@ -197,7 +218,7 @@ const server = http.createServer(async (req, res) => {
 
       // Default auth / cloud / store response
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true, user: { email: 'pro@fotoreto.local' } }));
+      res.end(JSON.stringify({ ok: true, user: { email: 'pro@DEVSTU.local' } }));
       return;
     }
 
@@ -219,7 +240,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // 4. Remote caching proxy for missing files
-    if (pathname.startsWith('/vendor/') || pathname.startsWith('/hptul/') || pathname.startsWith('/icons/')) {
+    if (pathname.startsWith('/vendor/') || pathname.startsWith('/hptul/') || pathname.startsWith('/icons/') || pathname.startsWith('/fonts/') || pathname.startsWith('/cache_t/')) {
       const remoteUrl = REMOTE_BASE + pathname;
       console.log(`[Cache Miss] Downloading from remote: ${remoteUrl}`);
       try {
@@ -251,7 +272,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`\n======================================================`);
-  console.log(` Fotoreto Pro Unlocked (Offline Suite) is running!`);
+  console.log(` DEVSTU Pro Unlocked (Offline Suite) is running!`);
   console.log(` URL: http://127.0.0.1:${PORT}`);
   console.log(`======================================================\n`);
 });

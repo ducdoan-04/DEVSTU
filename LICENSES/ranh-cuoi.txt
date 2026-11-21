@@ -1,12 +1,12 @@
-Fotoreto smile line model ("Làm mờ rãnh cười AI") — vendor/skin-ai/ranh-cuoi-v1.onnx
+DEVSTU smile line model ("Làm mờ rãnh cười AI") — vendor/skin-ai/ranh-cuoi-v1.onnx
 
-Own model of Fotoreto / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 03/11/2026 from scratch on
+Own model of DEVSTU / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 03/11/2026 from scratch on
 the author's own before / after smile line retouch photo pairs with tools/train-da (train.py: U-Net, ~2.7 million parameters,
 Conv / ReLU / max-pool / bilinear upsampling only). No third-party weights, code or datasets are included.
 Weights stored as float16 (tools/onnx-fp16-store.py), computed in float32.
 
 sha256 fad6ed303189db10edc04ab2f073580f53c8436a8a431e3dabe27c0bab714536  ranh-cuoi-v1.onnx
 
-Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the Fotoreto app.
+Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the DEVSTU app.
 
 Runs with ONNX Runtime Web 1.20.1 (MIT) — see onnxruntime.txt.

@@ -1333,7 +1333,7 @@ function renderLibraryGrid() {
           <div style="font-size: 15px; font-weight: 600; color: #dfe4ed;">Thư viện ảnh trống</div>
           <div style="font-size: 12px; color: #6e7481; max-width: 320px; text-align: center;">Chưa có ảnh nào trong dự án. Bấm nút dưới để thêm ảnh hoặc RAW từ máy tính.</div>
           <button type="button" class="retouch-btn-import" onclick="typeof it==='function'?it('open-dialog','add-photos'):document.querySelector('.strip button.add')?.click()" style="margin-top: 4px; padding: 6px 16px; height: 34px;">
-            + Thêm ảnh vào thư viện
+            +Chọn ảnh từ máy
           </button>
         </div>
       `;

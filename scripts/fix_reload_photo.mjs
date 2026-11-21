@@ -4,12 +4,12 @@ const appPath = 'assets/app-7UAGS7H2.js';
 let appCode = fs.readFileSync(appPath, 'utf8');
 
 // Find the target in Owt()
-const needle = 'if(v.checkBlank=k,v.present=m,fxt(x),Awt(x),Cwt(x),Twt(x),Lwt(x),Fwt(x),_wt(x),Dwt(x),window.FotoretoFiles)try{localStorage.getItem("ftr.probe")==="1"&&u.enableEarlyProbe()}catch{}return{root:v.root,autoCard:v.autoCard,tools:v.toolbar,gpuReady:v.gpuReady,toolCards:[v.heal.card,v.brush.card,v.legs.card,v.crop.card]}';
+const needle = 'if(v.checkBlank=k,v.present=m,fxt(x),Awt(x),Cwt(x),Twt(x),Lwt(x),Fwt(x),_wt(x),Dwt(x),window.DEVSTUFiles)try{localStorage.getItem("ftr.probe")==="1"&&u.enableEarlyProbe()}catch{}return{root:v.root,autoCard:v.autoCard,tools:v.toolbar,gpuReady:v.gpuReady,toolCards:[v.heal.card,v.brush.card,v.legs.card,v.crop.card]}';
 
 console.log('App needle found:', appCode.includes(needle));
 
 if (appCode.includes(needle)) {
-  const replacement = `if(v.checkBlank=k,v.present=m,fxt(x),Awt(x),Cwt(x),Twt(x),Lwt(x),Fwt(x),_wt(x),Dwt(x),window.FotoretoFiles)try{localStorage.getItem("ftr.probe")==="1"&&u.enableEarlyProbe()}catch{}
+  const replacement = `if(v.checkBlank=k,v.present=m,fxt(x),Awt(x),Cwt(x),Twt(x),Lwt(x),Fwt(x),_wt(x),Dwt(x),window.DEVSTUFiles)try{localStorage.getItem("ftr.probe")==="1"&&u.enableEarlyProbe()}catch{}
 window._devstuStageInternal = v;
 window._devstuViewer = u;
 window._devstuReloadPhoto = async function(P) {

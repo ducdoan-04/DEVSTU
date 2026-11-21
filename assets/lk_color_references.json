@@ -1,0 +1,125 @@
+{
+  "personal": [
+    {
+      "id": "06eccdb8cbe8d44688acc037e4760c1ef73cbef327a81931ddd9e3ebb6c6a303",
+      "name": "Cá nhân · Áo dài đỏ",
+      "scene": "color_ai_example/images/lk_magic_personal_v1/06eccdb8cbe8d44688acc037e4760c1ef73cbef327a81931ddd9e3ebb6c6a303.jpg",
+      "icon": "color_ai_example/icon/lk_magic_personal_v1/06eccdb8cbe8d44688acc037e4760c1ef73cbef327a81931ddd9e3ebb6c6a303.jpg",
+      "group": "personal"
+    },
+    {
+      "id": "6ffda2659463ed78c4b26eff29ba2dd24f2c001a86db0e031810b4bf34facf11",
+      "name": "Cá nhân · Studio đen",
+      "scene": "color_ai_example/images/lk_magic_personal_v1/6ffda2659463ed78c4b26eff29ba2dd24f2c001a86db0e031810b4bf34facf11.jpg",
+      "icon": "color_ai_example/icon/lk_magic_personal_v1/6ffda2659463ed78c4b26eff29ba2dd24f2c001a86db0e031810b4bf34facf11.jpg",
+      "group": "personal"
+    },
+    {
+      "id": "6322a8d4a2b725f7f18761064fee1f0629263f3ca37a020cdc002321c0482c06",
+      "name": "Cá nhân · Studio trắng",
+      "scene": "color_ai_example/images/lk_magic_personal_v1/6322a8d4a2b725f7f18761064fee1f0629263f3ca37a020cdc002321c0482c06.jpg",
+      "icon": "color_ai_example/icon/lk_magic_personal_v1/6322a8d4a2b725f7f18761064fee1f0629263f3ca37a020cdc002321c0482c06.jpg",
+      "group": "personal"
+    },
+    {
+      "id": "f1009483941355d1c681467aa13d8c184fe03982b5e750858164ac0f7aae88d9",
+      "name": "Cá nhân · Bầu nghệ thuật 1",
+      "scene": "color_ai_example/images/lk_magic_personal_v1/f1009483941355d1c681467aa13d8c184fe03982b5e750858164ac0f7aae88d9.jpg",
+      "icon": "color_ai_example/icon/lk_magic_personal_v1/f1009483941355d1c681467aa13d8c184fe03982b5e750858164ac0f7aae88d9.jpg",
+      "group": "personal"
+    },
+    {
+      "id": "bd1e380d32377fd7964778fa61d3c52bf79931ec65fe76a243826feececdf9a7",
+      "name": "Cá nhân · Đầm đen studio",
+      "scene": "color_ai_example/images/lk_magic_personal_v1/bd1e380d32377fd7964778fa61d3c52bf79931ec65fe76a243826feececdf9a7.jpg",
+      "icon": "color_ai_example/icon/lk_magic_personal_v1/bd1e380d32377fd7964778fa61d3c52bf79931ec65fe76a243826feececdf9a7.jpg",
+      "group": "personal"
+    },
+    {
+      "id": "5519fa4815effd61d25b789d28785a4eacce41a3c296a36f4b4039f03d064035",
+      "name": "Cá nhân · Bầu nghệ thuật 2",
+      "scene": "color_ai_example/images/lk_magic_personal_v1/5519fa4815effd61d25b789d28785a4eacce41a3c296a36f4b4039f03d064035.jpg",
+      "icon": "color_ai_example/icon/lk_magic_personal_v1/5519fa4815effd61d25b789d28785a4eacce41a3c296a36f4b4039f03d064035.jpg",
+      "group": "personal"
+    }
+  ],
+  "presets": [
+    {
+      "id": "xitangpai_01",
+      "name": "Phong cách Kẹo Hỷ 01",
+      "scene": "color_ai_example/images/xitangpai/xitangpai01.jpg",
+      "icon": "color_ai_example/icon/xitangpai/xitangpai01.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "xitangpai_02",
+      "name": "Phong cách Kẹo Hỷ 02",
+      "scene": "color_ai_example/images/xitangpai/xitangpai02.jpg",
+      "icon": "color_ai_example/icon/xitangpai/xitangpai02.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "fuguangxinbu_01",
+      "name": "Bước chân Ánh sáng 01",
+      "scene": "color_ai_example/images/fuguangxinbu/fuguangxinbu01.jpg",
+      "icon": "color_ai_example/icon/fuguangxinbu/fuguangxinbu01.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "fuguangxinbu_02",
+      "name": "Bước chân Ánh sáng 02",
+      "scene": "color_ai_example/images/fuguangxinbu/fuguangxinbu02.jpg",
+      "icon": "color_ai_example/icon/fuguangxinbu/fuguangxinbu02.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "chunbaishiyan_01",
+      "name": "Lời thề Trắng tinh 01",
+      "scene": "color_ai_example/images/chunbaishiyan/chunbaishiyan01.jpg",
+      "icon": "color_ai_example/icon/chunbaishiyan/chunbaishiyan01.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "chunbaishiyan_02",
+      "name": "Lời thề Trắng tinh 02",
+      "scene": "color_ai_example/images/chunbaishiyan/chunbaishiyan02.jpg",
+      "icon": "color_ai_example/icon/chunbaishiyan/chunbaishiyan02.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "jinxiuliangyuan_01",
+      "name": "Lương duyên Gấm vóc 01",
+      "scene": "color_ai_example/images/jinxiuliangyuan/jinxiuliangyuan01.jpg",
+      "icon": "color_ai_example/icon/jinxiuliangyuan/jinxiuliangyuan01.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "jinxiuliangyuan_02",
+      "name": "Lương duyên Gấm vóc 02",
+      "scene": "color_ai_example/images/jinxiuliangyuan/jinxiuliangyuan02.jpg",
+      "icon": "color_ai_example/icon/jinxiuliangyuan/jinxiuliangyuan02.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "lvyinzhiyue_01",
+      "name": "Hẹn ước Đồng xanh 01",
+      "scene": "color_ai_example/images/lvyinzhiyue/lvyinzhiyue01.jpg",
+      "icon": "color_ai_example/icon/lvyinzhiyue/lvyinzhiyue01.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "lvyinzhiyue_02",
+      "name": "Hẹn ước Đồng xanh 02",
+      "scene": "color_ai_example/images/lvyinzhiyue/lvyinzhiyue02.jpg",
+      "icon": "color_ai_example/icon/lvyinzhiyue/lvyinzhiyue02.jpg",
+      "group": "preset"
+    },
+    {
+      "id": "lvyemanbu_01",
+      "name": "Dạo bước đồng xanh",
+      "scene": "color_ai_example/images/lvyemanbu/lvyemanbu01.jpg",
+      "icon": "color_ai_example/icon/lvyemanbu/lvyemanbu01.jpg",
+      "group": "preset"
+    }
+  ]
+}

@@ -1,12 +1,12 @@
-Fotoreto Clothing wrinkle retouch model ("Xoá nếp nhăn áo AI") — vendor/skin-ai/ao-retouch-v1.onnx
+DEVSTU Clothing wrinkle retouch model ("Xoá nếp nhăn áo AI") — vendor/skin-ai/ao-retouch-v1.onnx
 
-Own model of Fotoreto / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 02/11/2026 from scratch on
+Own model of DEVSTU / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 02/11/2026 from scratch on
 the author's own before / after clothing-retouch photo pairs (about 3,000 photos) with tools/train-da (train.py: U-Net, ~2.7 million parameters,
 Conv / ReLU / max-pool / bilinear upsampling only). No third-party weights, code or datasets are included.
 Weights stored as float16 (tools/onnx-fp16-store.py), computed in float32.
 
 sha256 b4b065bd388a8249f6e2114b54bf495face4be5a74cf49345ca9770c9b068da8  ao-retouch-v1.onnx
 
-Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the Fotoreto app.
+Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the DEVSTU app.
 
 Runs with ONNX Runtime Web 1.20.1 (MIT) — see onnxruntime.txt.

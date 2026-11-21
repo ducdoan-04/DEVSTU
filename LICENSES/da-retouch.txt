@@ -1,12 +1,12 @@
-Fotoreto skin retouch model ("Làm đẹp da AI") — vendor/skin-ai/da-retouch-v1.onnx
+DEVSTU skin retouch model ("Làm đẹp da AI") — vendor/skin-ai/da-retouch-v1.onnx
 
-Own model of Fotoreto / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 31/10/2026 from scratch on the author's own
+Own model of DEVSTU / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 31/10/2026 from scratch on the author's own
 before / after skin-retouch photo pairs (~5,400 photos, ~7,100 faces) with tools/train-da (train.py: U-Net, ~2.7 million
 parameters, Conv / ReLU / max-pool / bilinear upsampling only). No third-party weights, code or datasets are included.
 Weights stored as float16 (tools/onnx-fp16-store.py), computed in float32.
 
 sha256 3c25daea18cfd750c659f00e5a712dcfccfc1d6e1cab82fcfb105ca95463734a  da-retouch-v1.onnx
 
-Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the Fotoreto app.
+Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the DEVSTU app.
 
 Runs with ONNX Runtime Web 1.20.1 (MIT) — see onnxruntime.txt.

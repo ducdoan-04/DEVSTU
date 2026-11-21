@@ -7,16 +7,34 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
+        "label": "splash",
+        "title": "DEVSTU",
+        "url": "http://127.0.0.1:3000/splash.html",
+        "width": 1120,
+        "height": 520,
+        "center": true,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": true,
+        "decorations": false,
+        "transparent": true,
+        "visible": true
+      },
+      {
+        "label": "main",
         "title": "DEVSTU · AI Photo Retouching Suite",
-        "url": "http://127.0.0.1:3000",
+        "url": "http://127.0.0.1:3000/?tauri_main=1",
         "width": 1440,
         "height": 900,
         "minWidth": 1024,
         "minHeight": 700,
+        "center": true,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "visible": false
       }
     ],
     "security": {

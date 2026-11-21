@@ -13,12 +13,12 @@ import numpy as np
 import cv2
 from PIL import Image
 
-# Search paths for LiYing source
+# Search paths for bundled LiYing source
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LIYING_DIRS = [
-    r"F:\Workspace\Code projects\LiYing-master",
-    r"F:\Workspace\Code projects\LiYing",
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "LiYing-master"),
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "LiYing"),
+    os.path.join(PROJECT_DIR, "LiYing-master"),
+    os.path.join(PROJECT_DIR, "LiYing"),
+    PROJECT_DIR,
 ]
 
 liying_root = None
@@ -26,11 +26,6 @@ for d in LIYING_DIRS:
     if os.path.isdir(os.path.join(d, "src", "tool")):
         liying_root = d
         break
-
-if not liying_root:
-    cand = r"F:\Workspace\Code projects\LiYing-master"
-    if os.path.exists(cand):
-        liying_root = cand
 
 if not liying_root:
     sys.stderr.write("ERROR: Could not locate LiYing project directory\n")
@@ -99,10 +94,9 @@ ImageSegmentation.infer = _fixed_infer
 
 def find_model(model_name):
     cands = [
+        os.path.join(PROJECT_DIR, "models", model_name),
         os.path.join(liying_root, "src", "model", model_name),
         os.path.join(liying_root, "model", model_name),
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", model_name),
-        r"F:\Workspace\Code projects\LiYing-master\src\model\\" + model_name,
     ]
     for c in cands:
         if os.path.isfile(c):
@@ -213,11 +207,13 @@ def main():
             photo = processor.change_background(rgb_list=rgb_list)
             out_img = photo.image  # BGRA OpenCV image
 
-        # Save replaced image
+        # Save replaced image (Unicode/Vietnamese-path safe)
         os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
-        is_saved = cv2.imwrite(args.output, out_img)
-        if not is_saved:
-            raise IOError(f"cv2.imwrite failed to write to {args.output}")
+        out_ext = os.path.splitext(args.output)[1] or ".png"
+        ok_enc, enc_buf = cv2.imencode(out_ext, out_img)
+        if not ok_enc:
+            raise IOError(f"cv2.imencode failed for {args.output}")
+        enc_buf.tofile(args.output)
 
         # Optional matte output
         if args.matte_output:
@@ -235,7 +231,10 @@ def main():
                     matte_ch = processor.segmentation.postprocess_image(raw_out, out_img.shape[:2])
                 
                 os.makedirs(os.path.dirname(os.path.abspath(args.matte_output)), exist_ok=True)
-                cv2.imwrite(args.matte_output, matte_ch)
+                m_ext = os.path.splitext(args.matte_output)[1] or ".png"
+                ok_m, enc_m = cv2.imencode(m_ext, matte_ch)
+                if ok_m:
+                    enc_m.tofile(args.matte_output)
             except Exception as me:
                 sys.stderr.write(f"WARN: failed to write matte output: {me}\n")
 

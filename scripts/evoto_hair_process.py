@@ -197,7 +197,10 @@ def main():
         sys.exit(1)
 
     t0 = time.time()
-    img_bgr = cv2.imread(in_path)
+    try:
+        img_bgr = cv2.imdecode(np.fromfile(in_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+    except Exception:
+        img_bgr = None
     if img_bgr is None:
         sys.stderr.write(f"Cannot read image: {in_path}\n")
         sys.exit(1)
@@ -211,7 +214,7 @@ def main():
 
     if mask_path and os.path.exists(mask_path):
         try:
-            mask_rgba = cv2.imread(mask_path, cv2.IMREAD_UNCHANGED)
+            mask_rgba = cv2.imdecode(np.fromfile(mask_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
             if mask_rgba is not None:
                 if mask_rgba.shape[0] != h or mask_rgba.shape[1] != w:
                     mask_rgba = cv2.resize(mask_rgba, (w, h), interpolation=cv2.INTER_LINEAR)
@@ -230,7 +233,6 @@ def main():
         model_candidates = [
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "selfie_multiclass_256x256.tflite"),
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "selfie_multiclass_256x256.tflite"),
-            r"F:\Workspace\Code projects\2. Tool Media by Doan\Collabs-Retouch-Pro\public\models\selfie_multiclass_256x256.tflite",
             r"models\selfie_multiclass_256x256.tflite"
         ]
         model_path = None
@@ -245,7 +247,9 @@ def main():
                 from mediapipe.tasks import python
                 from mediapipe.tasks.python import vision
 
-                base_options = python.BaseOptions(model_asset_path=model_path)
+                with open(model_path, "rb") as mf:
+                    model_bytes = mf.read()
+                base_options = python.BaseOptions(model_asset_buffer=model_bytes)
                 options = vision.ImageSegmenterOptions(
                     base_options=base_options,
                     output_category_mask=False,
@@ -287,7 +291,11 @@ def main():
     final_bgr = img_bgr.copy()
     final_bgr[diff_mask] = out_bgr[diff_mask]
 
-    cv2.imwrite(out_path, final_bgr)
+    out_ext = os.path.splitext(out_path)[1] or ".png"
+    ok_enc, enc_buf = cv2.imencode(out_ext, final_bgr)
+    if not ok_enc:
+        raise IOError(f"cv2.imencode failed for {out_path}")
+    enc_buf.tofile(out_path)
     elapsed = int((time.time() - t0) * 1000)
     print(json.dumps({"ok": True, "elapsed_ms": elapsed, "preset": preset, "modified_pixels": int(np.count_nonzero(diff_mask))}))
 

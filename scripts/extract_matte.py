@@ -5,15 +5,13 @@ import json
 import time
 from io import BytesIO
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(SCRIPT_DIR)
 MODEL_CANDIDATES = [
     os.path.join(PROJECT_DIR, "models", "RMBG-1.4-model.onnx"),
     os.path.join(PROJECT_DIR, "src-tauri", "models", "RMBG-1.4-model.onnx"),
-    r"F:\Workspace\Code projects\LiYing-master\src\model\RMBG-1.4-model.onnx",
-    r"F:\Workspace\Code projects\LiYing\src\model\RMBG-1.4-model.onnx",
 ]
 
 _session = None
@@ -97,21 +95,24 @@ def process_pil_image(img_pil: Image.Image) -> Image.Image:
         coarse_np = np.array(matte_coarse)
         
         if hasattr(cv2, "ximgproc") and hasattr(cv2.ximgproc, "guidedFilter"):
-            refined_np = cv2.ximgproc.guidedFilter(
-                guide=guide_np, src=coarse_np, radius=8, eps=1e-4
+            guide_f = guide_np.astype(np.float32) / 255.0
+            coarse_f = coarse_np.astype(np.float32) / 255.0
+            out_f = cv2.ximgproc.guidedFilter(
+                guide=guide_f, src=coarse_f, radius=3, eps=1e-5
             )
+            refined_np = (np.clip(out_f, 0.0, 1.0) * 255.0).astype(np.uint8)
         else:
             # Box-filter guided filter fallback
             p = coarse_np.astype(np.float32) / 255.0
             I = cv2.cvtColor(guide_np, cv2.COLOR_RGB2GRAY).astype(np.float32) / 255.0
-            r = 8
-            eps = 1e-4
+            r = 5
+            eps = 1e-5
             mean_I = cv2.boxFilter(I, -1, (r, r))
             mean_p = cv2.boxFilter(p, -1, (r, r))
             mean_Ip = cv2.boxFilter(I * p, -1, (r, r))
             cov_Ip = mean_Ip - mean_I * mean_p
             mean_II = cv2.boxFilter(I * I, -1, (r, r))
-            var_I = mean_II - mean_I * mean_I
+            var_I = np.maximum(0.0, mean_II - mean_I * mean_I)
             a = cov_Ip / (var_I + eps)
             b = mean_p - a * mean_I
             mean_a = cv2.boxFilter(a, -1, (r, r))
@@ -131,9 +132,9 @@ def run_single(input_arg: str, output_path: str):
         if "," in input_arg:
             input_arg = input_arg.split(",", 1)[1]
         data = base64.b64decode(input_arg)
-        img = Image.open(BytesIO(data)).convert("RGB")
+        img = ImageOps.exif_transpose(Image.open(BytesIO(data))).convert("RGB")
     else:
-        img = Image.open(input_arg).convert("RGB")
+        img = ImageOps.exif_transpose(Image.open(input_arg)).convert("RGB")
         
     matte = process_pil_image(img)
     matte.save(output_path, format="PNG")
@@ -168,9 +169,9 @@ def run_daemon():
                 if "," in b64:
                     b64 = b64.split(",", 1)[1]
                 data = base64.b64decode(b64)
-                img = Image.open(BytesIO(data)).convert("RGB")
+                img = ImageOps.exif_transpose(Image.open(BytesIO(data))).convert("RGB")
             elif "input_path" in req:
-                img = Image.open(req["input_path"]).convert("RGB")
+                img = ImageOps.exif_transpose(Image.open(req["input_path"])).convert("RGB")
             else:
                 raise ValueError("Missing 'image_base64' or 'input_path'")
                 
