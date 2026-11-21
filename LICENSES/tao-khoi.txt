@@ -1,12 +1,12 @@
 DEVSTU face sculpting model ("Tạo khối mặt AI") — vendor/skin-ai/tao-khoi-v1.onnx
 
-Own model of DEVSTU / Hoàng Phúc Photo (Nguyễn Hoàng Phúc), trained 03/11/2026 from scratch on
+Own model of DEVSTU / ducdoan-04 Photo (ducdoan-04), trained 03/11/2026 from scratch on
 the author's own before / after face sculpting retouch photo pairs with tools/train-da (train.py: U-Net, ~2.7 million parameters,
 Conv / ReLU / max-pool / bilinear upsampling only). No third-party weights, code or datasets are included.
 Weights stored as float16 (tools/onnx-fp16-store.py), computed in float32.
 
 sha256 eb5aacba32766d34f7839010c8582260d3837f9d028a37a2b2997a36de09aa20  tao-khoi-v1.onnx
 
-Copyright (c) 2026 Nguyễn Hoàng Phúc (Hoàng Phúc Photo). All rights reserved. Used only inside the DEVSTU app.
+Copyright (c) 2026 ducdoan-04 (ducdoan-04 Photo). All rights reserved. Used only inside the DEVSTU app.
 
 Runs with ONNX Runtime Web 1.20.1 (MIT) — see onnxruntime.txt.
