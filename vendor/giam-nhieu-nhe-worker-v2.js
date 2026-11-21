@@ -1,4 +1,4 @@
-// Giảm nhiễu bằng AI — mô hình nhẹ của Fotoreto (06/11/2026, README §23z196): U-Net chỉ có tích chập 3×3 + ReLU, 4,2 triệu tham số, học bắt chước
+// Giảm nhiễu bằng AI — mô hình nhẹ của DEVSTU (06/11/2026, README §23z196): U-Net chỉ có tích chập 3×3 + ReLU, 4,2 triệu tham số, học bắt chước
 // SCUNet trên ảnh RAW / JPEG của Hoàng Phúc Photo (PSNR 46,7 dB so với SCUNet trên ảnh kiểm). Nhanh hơn SCUNet ~20 lần: ảnh 26 MP trên card Intel
 // tích hợp ~43 giây (SCUNet 13,4 phút). ONNX Runtime Web 1.31.1 (scunet2/, MIT), ô cố định 512 × 512.
 // Mô hình trên hosting ĐÃ MÃ HOÁ ("FRM1" + IV 12 byte + AES-256-GCM, tools/ma-hoa-mo-hinh.mjs); chìa do máy chủ phát cho người có Premium

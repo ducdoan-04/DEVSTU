@@ -1,4 +1,4 @@
-// Làm đẹp da AI (31/10/2026 — README §23z113): mô hình riêng của Fotoreto (tools/train-da, train từ ảnh trước / sau retouch da của anh
+// Làm đẹp da AI (31/10/2026 — README §23z113): mô hình riêng của DEVSTU (tools/train-da, train từ ảnh trước / sau retouch da của anh
 // Phúc — LICENSES/da-retouch.txt), U-Net ~2,7 triệu tham số, nhận ảnh cắt quanh một khuôn mặt (cạnh chia hết cho 16, 0..1) → ảnh đã
 // làm đẹp da cùng cỡ. Chạy bằng ONNX Runtime Web 1.20.1 (MIT) dùng chung với giảm nhiễu AI (vendor/scunet/) — ưu tiên WebGPU, không
 // có thì WASM. Trọng số cất fp16 (tools/onnx-fp16-store.py, 5,5 MB), tính fp32.

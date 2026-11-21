@@ -1,4 +1,4 @@
-// AI sửa theo vùng trên cả ảnh (02/11/2026 — README §23z161): hai mô hình riêng của Fotoreto, train từ ảnh retouch của anh Phúc (tools/train-toc-ao;
+// AI sửa theo vùng trên cả ảnh (02/11/2026 — README §23z161): hai mô hình riêng của DEVSTU, train từ ảnh retouch của anh Phúc (tools/train-toc-ao;
 // LICENSES/ao-retouch.txt, LICENSES/da-than.txt, toc-retouch.txt, ranh-cuoi.txt, tao-khoi.txt): ao-retouch-v1 xoá nếp nhăn quần áo, da-than-v1 làm đẹp da cơ thể; 03/11 (README §23z184): toc-retouch-v1 làm gọn tóc, ranh-cuoi-v1 làm mờ rãnh cười, tao-khoi-v1 tạo khối mặt. Cùng kiến trúc U-Net ~2,7 triệu tham
 // số với da-retouch, nhận ô vuông cắt từ ảnh (cạnh chia hết cho 16, 0..1) → ô đã sửa cùng cỡ. ONNX Runtime Web 1.20.1 (MIT) dùng chung với giảm nhiễu AI
 // (vendor/scunet/). File trên hosting đã mã hoá như da-retouch ("FRM1" + IV 12 byte + AES-256-GCM — tools/ma-hoa-mo-hinh.mjs); app gửi chìa máy chủ phát
